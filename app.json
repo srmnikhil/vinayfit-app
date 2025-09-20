@@ -1,0 +1,99 @@
+{
+  "expo": {
+    "name": "VinayFit",
+    "slug": "bolt-expo-starter",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/adaptive-icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vinayfit.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to record voice messages.",
+        "UIBackgroundModes": ["audio", "audio"]
+      },
+      "icons": [
+        "./assets/ios-icons/ios-light.png",
+        "./assets/ios-icons/ios-dark.png",
+        "./assets/ios-icons/ios-tinted.png",
+        "./assets/ios-icons/ios-light.png",
+        "./assets/ios-icons/ios-dark.png",
+        "./assets/ios-icons/ios-tinted.png"
+      ]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "monochromeImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "ACTIVITY_RECOGNITION",
+        "RECORD_AUDIO",
+        "FOREGROUND_SERVICE",
+        "WAKE_LOCK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "ACTIVITY_RECOGNITION",
+        "RECORD_AUDIO",
+        "FOREGROUND_SERVICE",
+        "WAKE_LOCK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.vinayfit.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-video",
+      "expo-audio"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "owner": "srmnikku",
+    "splash": {
+      "image": "./assets/icons/splash-icon-dark.png",
+      "imageWidth": "200",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "image": "./assets/icons/splash-icon-light.png",
+        "imageWidth": "200",
+        "resizeMode": "contain",
+        "backgroundColor": "#667EEA"
+      }
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#000000",
+      "barStyle": "light-content"
+    },
+    "backgroundColor": "#000000",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5dbc86eb-eabb-4d86-954f-16641fda8c14"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/5dbc86eb-eabb-4d86-954f-16641fda8c14",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    }
+  }
+}
