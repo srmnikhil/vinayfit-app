@@ -14,15 +14,7 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app needs access to your microphone to record voice messages.",
         "UIBackgroundModes": ["audio", "audio"]
-      },
-      "icons": [
-        "./assets/ios-icons/ios-light.png",
-        "./assets/ios-icons/ios-dark.png",
-        "./assets/ios-icons/ios-tinted.png",
-        "./assets/ios-icons/ios-light.png",
-        "./assets/ios-icons/ios-dark.png",
-        "./assets/ios-icons/ios-tinted.png"
-      ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -86,9 +78,7 @@
         "projectId": "5dbc86eb-eabb-4d86-954f-16641fda8c14"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/5dbc86eb-eabb-4d86-954f-16641fda8c14",
       "enabled": true,
