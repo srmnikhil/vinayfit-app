@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useUserRole } from '@/contexts/UserContext';
 import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { router } from 'expo-router';
@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import CoachingClientView from '@/components/coaching/CoachingClientView';
 import CoachingTrainerView from '@/components/coaching/CoachingTrainerView';
 import Loader from '@/components/Loader';
+import RestrictedAccess from '@/components/RestrictedAccess';
 
 export default function CoachingScreen() {
   const { userRole } = useUserRole();
@@ -16,7 +17,13 @@ export default function CoachingScreen() {
 
   // Show loading screen until userRole is defined
   if (userRole === null) {
-    return <Loader label='Loading Coaching Screen...' />
+    return <Loader label="Loading Coaching Screen..." />;
+  }
+
+  if (userRole === 'leads') {
+    return (
+      <RestrictedAccess message="You do not have access to the Coaching section." />
+    );
   }
 
   // Redirect to login if somehow userRole is undefined/invalid

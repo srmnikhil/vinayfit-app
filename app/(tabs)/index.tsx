@@ -13,6 +13,7 @@ import TodayNutritionistViewWithData from '@/components/today/TodayNutritionistV
 import TodayAdminViewWithData from '@/components/today/TodayAdminViewWithData';
 import TodayClientViewWithData from '@/components/today/TodayClientViewWithData';
 import TodayTrainerViewNew from '@/components/today/TodayTrainerViewNew';
+import LeadsView from '@/components/LeadsView';
 
 export default function TodayScreen() {
   const colorScheme = useColorScheme();
@@ -37,6 +38,8 @@ export default function TodayScreen() {
 
   // Render appropriate view based on user role
   switch (userRole) {
+     case 'leads':
+      return <LeadsView />;
     case 'client':
       return <TodayClientViewWithData />;
     case 'trainer':

@@ -10,7 +10,22 @@ import {
   RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { User, Settings, Clock, Droplets, TrendingUp, Calendar, Camera, ChartBar as BarChart3, Target, ChevronRight, Activity, LogOut, Footprints, RefreshCw } from 'lucide-react-native';
+import {
+  User,
+  Settings,
+  Clock,
+  Droplets,
+  TrendingUp,
+  Calendar,
+  Camera,
+  ChartBar as BarChart3,
+  Target,
+  ChevronRight,
+  Activity,
+  LogOut,
+  Footprints,
+  RefreshCw,
+} from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { useUserRole } from '@/contexts/UserContext';
@@ -20,7 +35,6 @@ import WeightMetricsCard from '@/components/WeightMetricsCard';
 import { getUserMetrics } from '@/lib/metricsDatabase';
 import { getCurrentUser } from '@/lib/supabase';
 import { supabase } from '@/lib/supabase';
-
 
 const { width } = Dimensions.get('window');
 
@@ -58,10 +72,10 @@ const SAMPLE_DATA = {
       { latitude: 37.78843, longitude: -122.4325 },
       { latitude: 37.78856, longitude: -122.4332 },
       { latitude: 37.78865, longitude: -122.4341 },
-      { latitude: 37.78875, longitude: -122.4350 },
+      { latitude: 37.78875, longitude: -122.435 },
       { latitude: 37.78895, longitude: -122.4365 },
-      { latitude: 37.78915, longitude: -122.4380 },
-      { latitude: 37.78925, longitude: -122.4390 },
+      { latitude: 37.78915, longitude: -122.438 },
+      { latitude: 37.78925, longitude: -122.439 },
       { latitude: 37.78935, longitude: -122.4395 },
     ],
     distance: 1240, // meters
@@ -78,10 +92,12 @@ export default function ProfileClientView() {
   const { user, signOut, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-
   if (loading) return null; // Prevent hook mismatch by not rendering until auth is ready
 
-  const [userInitials] = useState(user?.user_metadata?.first_name?.[0] + user?.user_metadata?.last_name?.[0] || 'VD');
+  const [userInitials] = useState(
+    user?.user_metadata?.first_name?.[0] +
+      user?.user_metadata?.last_name?.[0] || 'VD'
+  );
   const [trainingMinutes, setTrainingMinutes] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
   const [currentWeight, setCurrentWeight] = useState(0);
@@ -98,44 +114,48 @@ export default function ProfileClientView() {
       // Get training sessions for the last 30 days
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       const { data: sessions, error } = await supabase
         .from('training_sessions')
         .select('*')
         .eq('client_id', userId)
         .gte('scheduled_date', thirtyDaysAgo.toISOString().split('T')[0])
         .order('scheduled_date', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // Calculate total training minutes
-      const totalMinutes = sessions?.reduce((total, session) => {
-        return total + (session.duration || 0);
-      }, 0) || 0;
-      
+      const totalMinutes =
+        sessions?.reduce((total, session) => {
+          return total + (session.duration || 0);
+        }, 0) || 0;
+
       // Calculate streak days
       let streakDays = 0;
       const today = new Date();
-      const sessionDates = sessions
-        ?.filter(session => session.scheduled_date && session.scheduled_date !== '')
-        ?.map(s => {
-          const date = safeParseDate(s.scheduled_date);
-          return date ? date.toDateString() : null;
-        })
-        ?.filter(date => date !== null) || [];
-      
+      const sessionDates =
+        sessions
+          ?.filter(
+            (session) => session.scheduled_date && session.scheduled_date !== ''
+          )
+          ?.map((s) => {
+            const date = safeParseDate(s.scheduled_date);
+            return date ? date.toDateString() : null;
+          })
+          ?.filter((date) => date !== null) || [];
+
       for (let i = 0; i < 30; i++) {
         const checkDate = new Date(today);
         checkDate.setDate(checkDate.getDate() - i);
         const dateString = checkDate.toDateString();
-        
+
         if (sessionDates.includes(dateString)) {
           streakDays++;
         } else {
           break; // Streak broken
         }
       }
-      
+
       return { totalMinutes, streakDays };
     } catch (error) {
       console.error('Error calculating training stats:', error);
@@ -151,11 +171,15 @@ export default function ProfileClientView() {
         .eq('client_id', userId)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // Find weight goal
-      const weightGoal = goals?.find(goal => goal.category === 'weight' || goal.title.toLowerCase().includes('weight'));
+      const weightGoal = goals?.find(
+        (goal) =>
+          goal.category === 'weight' ||
+          goal.title.toLowerCase().includes('weight')
+      );
       return weightGoal?.target_value || 0;
     } catch (error) {
       console.error('Error fetching user goals:', error);
@@ -163,18 +187,20 @@ export default function ProfileClientView() {
     }
   };
 
-  const safeParseDate = (dateString: string | null | undefined): Date | null => {
+  const safeParseDate = (
+    dateString: string | null | undefined
+  ): Date | null => {
     if (!dateString || dateString === '') {
       return null;
     }
-    
+
     try {
       // Try parsing as ISO string first
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
         return date;
       }
-      
+
       // Try parsing as YYYY-MM-DD format
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
         const [year, month, day] = dateString.split('-').map(Number);
@@ -183,7 +209,7 @@ export default function ProfileClientView() {
           return parsedDate;
         }
       }
-      
+
       // Try parsing as MM/DD/YYYY format
       if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
         const [month, day, year] = dateString.split('/').map(Number);
@@ -192,7 +218,7 @@ export default function ProfileClientView() {
           return parsedDate;
         }
       }
-      
+
       console.warn('Could not parse date:', dateString);
       return null;
     } catch (error) {
@@ -205,59 +231,77 @@ export default function ProfileClientView() {
     try {
       setMetricsLoading(true);
       setError(null);
-      
+
       const { user } = await getCurrentUser();
       if (user) {
         const entries = await getUserMetrics(user.id);
-        
+
         // Debug: Log the first few entries to see the date format
         if (entries.length > 0) {
           console.log('Sample metric entry:', entries[0]);
-          console.log('Date format from Supabase:', typeof entries[0].date, entries[0].date);
+          console.log(
+            'Date format from Supabase:',
+            typeof entries[0].date,
+            entries[0].date
+          );
           console.log('All entries:', entries.slice(0, 3));
         } else {
           console.log('No metric entries found for user');
         }
-        
+
         // Transform entries into chart data
-        const weightEntries = entries.filter(entry => entry.metric_type === 'weight').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        const chestEntries = entries.filter(entry => entry.metric_type === 'chest').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        
+        const weightEntries = entries
+          .filter((entry) => entry.metric_type === 'weight')
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+        const chestEntries = entries
+          .filter((entry) => entry.metric_type === 'chest')
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+
         // Transform to MetricDataPoint format
         const weightChartData: any[] = weightEntries
-          .filter(entry => entry.date && entry.date !== '') // Filter out invalid dates
-          .map(entry => {
+          .filter((entry) => entry.date && entry.date !== '') // Filter out invalid dates
+          .map((entry) => {
             const date = safeParseDate(entry.date);
             if (!date) {
               console.warn('Invalid date for weight entry:', entry.date);
               return null;
             }
             return {
-              date: date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
+              date: date.toLocaleDateString('en-US', {
+                month: 'numeric',
+                day: 'numeric',
+              }),
               value: entry.value,
-              time: entry.time // Include time field
+              time: entry.time, // Include time field
             };
           })
-          .filter(item => item !== null) as any[];
-        
+          .filter((item) => item !== null) as any[];
+
         const chestChartData: any[] = chestEntries
-          .filter(entry => entry.date && entry.date !== '') // Filter out invalid dates
-          .map(entry => {
+          .filter((entry) => entry.date && entry.date !== '') // Filter out invalid dates
+          .map((entry) => {
             const date = safeParseDate(entry.date);
             if (!date) {
               console.warn('Invalid date for chest entry:', entry.date);
               return null;
             }
             return {
-              date: date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
-              value: entry.value
+              date: date.toLocaleDateString('en-US', {
+                month: 'numeric',
+                day: 'numeric',
+              }),
+              value: entry.value,
             };
           })
-          .filter(item => item !== null) as any[];
-        
+          .filter((item) => item !== null) as any[];
+
         setWeightData(weightChartData);
         setChestData(chestChartData);
-        
+
         // Set current values
         if (weightChartData.length > 0) {
           setCurrentWeight(weightChartData[weightChartData.length - 1].value);
@@ -265,30 +309,32 @@ export default function ProfileClientView() {
           // Set a default value if no weight data
           setCurrentWeight(0);
         }
-        
+
         // Add fallback data if no entries exist
         if (weightChartData.length === 0) {
           console.log('No weight data found, using fallback');
           setWeightData([{ date: '1/1', value: 0 }]);
         }
-        
+
         if (chestChartData.length === 0) {
           console.log('No chest data found, using fallback');
           setChestData([{ date: '1/1', value: 0 }]);
         }
-        
+
         // Calculate real training statistics
-        const { totalMinutes, streakDays } = await calculateTrainingStats(user.id);
+        const { totalMinutes, streakDays } = await calculateTrainingStats(
+          user.id
+        );
         setTrainingMinutes(totalMinutes);
         setStreakDays(streakDays);
         setGoalWeight(await fetchUserGoals(user.id));
-        
+
         console.log('✅ Metrics loaded successfully:', {
           weightEntries: weightChartData.length,
           chestEntries: chestChartData.length,
-          totalEntries: entries.length
+          totalEntries: entries.length,
         });
-        
+
         // Show brief success message
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 2000);
@@ -324,72 +370,79 @@ export default function ProfileClientView() {
     }
   };
 
-  const displayName = user?.user_metadata?.full_name || (typeof user?.email === 'string' && user.email ? user.email.split('@')[0] : 'User');
+  const displayName =
+    user?.user_metadata?.full_name ||
+    (typeof user?.email === 'string' && user.email
+      ? user.email.split('@')[0]
+      : 'User');
 
   const handleLogout = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: () => {
-            // Just call signOut; let auth context handle navigation and errors
-            signOut();
-          }
-        }
-      ]
-    );
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: () => {
+          // Just call signOut; let auth context handle navigation and errors
+          signOut();
+        },
+      },
+    ]);
   };
 
   const menuItems = [
-    {
-      id: 'steps',
-      title: 'Steps',
-      icon: Footprints,
-      color: colors.success,
-      onPress: () => router.push('/step-tracker'),
-    },
-    {
-      id: 'activity',
-      title: 'Activity history',
-      icon: Activity,
-      color: colors.primary,
-      onPress: () => router.push('/activity-history'),
-    },
-    {
-      id: 'my-plans',
-      title: 'My Workout Plans',
-      icon: Calendar,
-      color: colors.primary,
-      onPress: () => router.push('/my-plan'),
-    },
+    ...(userRole !== 'leads'
+      ? [
+          {
+            id: 'steps',
+            title: 'Steps',
+            icon: Footprints,
+            color: colors.success,
+            onPress: () => router.push('/step-tracker'),
+          },
+          {
+            id: 'activity',
+            title: 'Activity history',
+            icon: Activity,
+            color: colors.primary,
+            onPress: () => router.push('/activity-history'),
+          },
+          {
+            id: 'my-plans',
+            title: 'My Workout Plans',
+            icon: Calendar,
+            color: colors.primary,
+            onPress: () => router.push('/my-plan'),
+          },
 
-    {
-      id: 'exercises',
-      title: 'Your exercises',
-      icon: Target,
-      color: colors.success,
-      onPress: () => {},
-    },
-    {
-      id: 'progress',
-      title: 'Progress photo',
-      icon: Camera,
-      color: colors.warning,
-      onPress: () => router.push('/progress-photo'),
-    },
-    // Add fitness goals menu item for clients
-    ...(userRole === 'client' ? [{
-      id: 'goals',
-      title: 'Fitness Goals',
-      icon: Target,
-      color: colors.info,
-      onPress: () => router.push('/fitness-goals'),
-    }] : []),
-  
+          {
+            id: 'exercises',
+            title: 'Your exercises',
+            icon: Target,
+            color: colors.success,
+            onPress: () => {},
+          },
+          {
+            id: 'progress',
+            title: 'Progress photo',
+            icon: Camera,
+            color: colors.warning,
+            onPress: () => router.push('/progress-photo'),
+          },
+          // Add fitness goals menu item for clients
+          ...(userRole === 'client'
+            ? [
+                {
+                  id: 'goals',
+                  title: 'Fitness Goals',
+                  icon: Target,
+                  color: colors.info,
+                  onPress: () => router.push('/fitness-goals'),
+                },
+              ]
+            : []),
+        ]
+      : []),
   ];
 
   const handleMetricPointPress = (point: any, index: number) => {
@@ -397,7 +450,7 @@ export default function ProfileClientView() {
     // You can add haptic feedback or show a tooltip here
   };
 
-  const weightDates = weightData.map(item => item.date);
+  const weightDates = weightData.map((item) => item.date);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -408,9 +461,17 @@ export default function ProfileClientView() {
         </TouchableOpacity>
       </View> */}
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} />
-      }>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+          />
+        }
+      >
         {/* Profile Header */}
         {/* <View style={styles.profileHeader}>
           <LinearGradient
@@ -440,28 +501,41 @@ export default function ProfileClientView() {
         </View> */}
 
         {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: `${colors.primary}15` }]}>
-              <Clock size={20} color={colors.primary} />
+        {userRole !== 'leads' && (
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <View
+                style={[
+                  styles.statIcon,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
+                <Clock size={20} color={colors.primary} />
+              </View>
+              <Text style={styles.statNumber}>{trainingMinutes}</Text>
+              <Text style={styles.statLabel}>Training min</Text>
             </View>
-            <Text style={styles.statNumber}>{trainingMinutes}</Text>
-            <Text style={styles.statLabel}>Training min</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: `${colors.info}15` }]}>
-              <Droplets size={20} color={colors.info} />
+
+            <View style={styles.statCard}>
+              <View
+                style={[
+                  styles.statIcon,
+                  { backgroundColor: `${colors.info}15` },
+                ]}
+              >
+                <Droplets size={20} color={colors.info} />
+              </View>
+              <Text style={styles.statNumber}>{streakDays}</Text>
+              <Text style={styles.statLabel}>Streak days</Text>
             </View>
-            <Text style={styles.statNumber}>{streakDays}</Text>
-            <Text style={styles.statLabel}>Streak days</Text>
           </View>
-        </View>
-        <View style={styles.metricsSection}>
-        <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Metrics</Text>
-            <View style={styles.sectionActions}>
-              {/* <TouchableOpacity 
+        )}
+        {userRole !== 'leads' && (
+          <View style={styles.metricsSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Metrics</Text>
+              <View style={styles.sectionActions}>
+                {/* <TouchableOpacity 
                 style={styles.refreshButton} 
                 onPress={handleRefresh}
                 disabled={refreshing}
@@ -472,30 +546,39 @@ export default function ProfileClientView() {
                   style={refreshing ? { transform: [{ rotate: '360deg' }] } : undefined}
                 />
               </TouchableOpacity> */}
-              <TouchableOpacity onPress={() => router.push('/client-metrics')}>
-                <Text style={styles.viewMoreText}>View more</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => router.push('/client-metrics')}
+                >
+                  <Text style={styles.viewMoreText}>View more</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+            <WeightMetricsCard
+              weightData={weightData.map((item) => item.value)}
+              dates={weightData.map((item) => item.date)}
+              // times={weightData.map(item => item.time || '')}
+              unit="KG"
+              isLoading={isLoading}
+            />
           </View>
-        <WeightMetricsCard
-          weightData={weightData.map(item => item.value)}
-          dates={weightData.map(item => item.date)}
-          // times={weightData.map(item => item.time || '')}
-          unit="KG"
-          isLoading={isLoading}
-        />
-</View>
-
-
-      
+        )}
 
         {/* Menu Items */}
         <View style={styles.menuSection}>
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             return (
-              <TouchableOpacity key={item.id} style={styles.menuItem} onPress={item.onPress}>
-                <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
+              <TouchableOpacity
+                key={item.id}
+                style={styles.menuItem}
+                onPress={item.onPress}
+              >
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${item.color}15` },
+                  ]}
+                >
                   <IconComponent size={20} color={item.color} />
                 </View>
                 <Text style={styles.menuText}>{item.title}</Text>
@@ -504,315 +587,315 @@ export default function ProfileClientView() {
             );
           })}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  title: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 28,
-    color: colors.text,
-  },
-  settingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  profileAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  profileInitials: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 24,
-    color: '#FFFFFF',
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 20,
-    color: colors.text,
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  profileRole: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: colors.primary,
-    marginBottom: 4,
-    textTransform: 'capitalize',
-  },
-  goalButton: {
-    paddingVertical: 2,
-  },
-  goalButtonText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  goalButtonLink: {
-    color: colors.primary,
-    textDecorationLine: 'underline',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginBottom: 24,
-    gap: 16,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  statNumber: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 24,
-    color: colors.text,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  metricsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: colors.text,
-  },
-  viewMoreText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: colors.primary,
-  },
-  metricsCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 20,
     },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  metricsHeader: {
-    marginBottom: 12,
-  },
-  currentValueContainer: {
-    marginTop: 8,
-  },
-  metricsTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 12,
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-  },
-  currentWeight: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 32,
-    color: colors.text,
-  },
-  weightProgress: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
-  menuSection: {
-    paddingHorizontal: 20,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 1,
+    title: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 28,
+      color: colors.text,
     },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuText: {
-    flex: 1,
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: colors.text,
-  },
-  weightSummary: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surfaceSecondary,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-  },
-  summaryItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  summaryLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  summaryValue: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: colors.text,
-  },
-  viewDetailsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: colors.surfaceSecondary,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  viewDetailsText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
-    color: colors.primary,
-    marginRight: 8,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  loadingText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  errorText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  retryButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  successContainer: {
-    backgroundColor: colors.successLight,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  successText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: colors.successDark,
-  },
-  refreshButton: {
-    marginRight: 10,
-  },
-  sectionActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-});
+    settingsButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.surfaceSecondary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    scrollView: {
+      flex: 1,
+    },
+    profileHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    },
+    profileAvatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
+    },
+    profileInitials: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 24,
+      color: '#FFFFFF',
+    },
+    profileInfo: {
+      flex: 1,
+    },
+    profileName: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 20,
+      color: colors.text,
+      marginBottom: 4,
+    },
+    profileEmail: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    profileRole: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      color: colors.primary,
+      marginBottom: 4,
+      textTransform: 'capitalize',
+    },
+    goalButton: {
+      paddingVertical: 2,
+    },
+    goalButtonText: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    goalButtonLink: {
+      color: colors.primary,
+      textDecorationLine: 'underline',
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      paddingHorizontal: 20,
+      marginBottom: 24,
+      gap: 16,
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      alignItems: 'center',
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    statIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    statNumber: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 24,
+      color: colors.text,
+      marginBottom: 4,
+    },
+    statLabel: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    metricsSection: {
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+      color: colors.text,
+    },
+    viewMoreText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      color: colors.primary,
+    },
+    metricsCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    metricsHeader: {
+      marginBottom: 12,
+    },
+    currentValueContainer: {
+      marginTop: 8,
+    },
+    metricsTitle: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 12,
+      color: colors.textSecondary,
+      letterSpacing: 0.5,
+    },
+    currentWeight: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 32,
+      color: colors.text,
+    },
+    weightProgress: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    menuSection: {
+      paddingHorizontal: 20,
+    },
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 8,
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 1,
+    },
+    menuIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
+    },
+    menuText: {
+      flex: 1,
+      fontFamily: 'Inter-Medium',
+      fontSize: 16,
+      color: colors.text,
+    },
+    weightSummary: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 8,
+      padding: 16,
+      marginBottom: 16,
+    },
+    summaryItem: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    summaryLabel: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    summaryValue: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 16,
+      color: colors.text,
+    },
+    viewDetailsButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    viewDetailsText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 14,
+      color: colors.primary,
+      marginRight: 8,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 20,
+    },
+    loadingText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 20,
+    },
+    errorText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 16,
+      color: colors.error,
+      textAlign: 'center',
+      marginBottom: 15,
+    },
+    retryButton: {
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+    },
+    retryButtonText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 16,
+      color: '#FFFFFF',
+    },
+    successContainer: {
+      backgroundColor: colors.successLight,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 16,
+      alignItems: 'center',
+    },
+    successText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      color: colors.successDark,
+    },
+    refreshButton: {
+      marginRight: 10,
+    },
+    sectionActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+  });

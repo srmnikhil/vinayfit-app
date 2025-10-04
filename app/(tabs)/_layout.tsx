@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Chrome as Home, Dumbbell, MessageSquare, Play, User, Users, Apple, Shield, Briefcase } from 'lucide-react-native';
+import { Chrome as Home, Dumbbell, MessageSquare, Play, User, Users, Apple, Shield, Briefcase, House, HouseIcon } from 'lucide-react-native';
 import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { useUserRole } from '@/contexts/UserContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,7 +53,7 @@ export default function TabLayout() {
       {
         name: 'index',
         title: 'Today',
-        icon: Home,
+        icon: House,
       },
     ];
 

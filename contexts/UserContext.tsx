@@ -35,7 +35,7 @@ export function UserProvider({ children }: UserProviderProps) {
             );
           if (!error && profile) {
             // Accept 'leads' as a valid role for userRole
-            const newRole = (profile.role as UserRole) || 'client';
+            const newRole = (profile.role as UserRole) || 'leads';
             if (userRole && userRole !== newRole) {
               setUserRole(newRole);
               setUserName(typeof profile.full_name === 'string' && profile.full_name ? profile.full_name : (typeof user.email === 'string' && user.email ? user.email.split('@')[0] : 'User'));

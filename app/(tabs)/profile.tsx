@@ -68,6 +68,10 @@ export default function ProfileView() {
   const [trainerRating, setTrainerRating] = useState<number | null>(null);
   const [reviewCount, setReviewCount] = useState<number | null>(null);
 
+  // if(userRole === "leads"){
+
+  // }
+
   useEffect(() => {
     const fetchTrainerRating = async () => {
       if (userRole === 'trainer' && user) {
@@ -210,6 +214,8 @@ export default function ProfileView() {
       case 'admin':
         return 'Admin Manager';
       case 'client':
+      case 'leads':
+        return 'Guest';
       default:
         return 'Client';
     }
