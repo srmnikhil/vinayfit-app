@@ -131,13 +131,7 @@ export default function SettingsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => {
-            if (userRole === 'leads') {
-              router.replace('/(tabs)'); // redirect home
-            } else {
-              router.back(); // normal back
-            }
-          }}
+          onPress={() => router.back()}
           style={styles.backButton}
         >
           <ArrowLeft size={24} color={colors.text} />

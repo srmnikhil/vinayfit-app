@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,7 +12,8 @@ import TodayNutritionistViewWithData from '@/components/today/TodayNutritionistV
 import TodayAdminViewWithData from '@/components/today/TodayAdminViewWithData';
 import TodayClientViewWithData from '@/components/today/TodayClientViewWithData';
 import TodayTrainerViewNew from '@/components/today/TodayTrainerViewNew';
-import LeadsView from '@/components/LeadsView';
+import LeadsView from '@/components/today/LeadsView';
+import Loader from '@/components/Loader';
 
 export default function TodayScreen() {
   const colorScheme = useColorScheme();
@@ -23,7 +23,9 @@ export default function TodayScreen() {
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
         <View style={styles.errorContainer}>
           <Text style={[styles.errorTitle, { color: colors.text }]}>
             Unable to load data
@@ -36,9 +38,13 @@ export default function TodayScreen() {
     );
   }
 
+  if (userRole === null) {
+    return <Loader label="Loading your dashboard..." />;
+  }
+
   // Render appropriate view based on user role
   switch (userRole) {
-     case 'leads':
+    case 'leads':
       return <LeadsView />;
     case 'client':
       return <TodayClientViewWithData />;
@@ -51,14 +57,16 @@ export default function TodayScreen() {
       return <TodayAdminViewWithData />;
     default:
       return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView
+          style={[styles.container, { backgroundColor: colors.background }]}
+        >
           <View style={styles.errorContainer}>
             <Text style={[styles.errorTitle, { color: colors.text }]}>
               Welcome to VinayFit
             </Text>
             <Text style={[styles.errorText, { color: colors.textSecondary }]}>
-              Please complete your profile setup to continue.
-              "You can do this in the Profile tab."
+              Please complete your profile setup to continue. "You can do this
+              in the Profile tab."
             </Text>
           </View>
         </SafeAreaView>
