@@ -233,7 +233,7 @@ export default function SplashScreen() {
                 transform: [{ translateY: textTranslateY }],
               }}
             >
-              <Text style={styles.appName}>VinayFit</Text>
+              <Text style={styles.appName}>BODIQU</Text>
             </Animated.View>
 
             {/* Tagline */}
@@ -325,7 +325,7 @@ export default function SplashScreen() {
             { opacity: taglineOpacity }
           ]}
         >
-          <Text style={styles.footerText}>Powered by VinayFit</Text>
+          <Text style={styles.footerText}>Powered by BODIQU</Text>
           <View style={styles.footerDots}>
             {[0, 1, 2].map((index) => (
               <Animated.View

@@ -128,7 +128,7 @@ export default function InviteAcceptScreen() {
       setUserName(fullName);
       
       Alert.alert(
-        'Welcome to VinayFit!',
+        'Welcome to BODIQU!',
         `Your account has been created successfully. You have ${inviteData.trial} days of trial access.`,
         [
           {
@@ -213,7 +213,7 @@ export default function InviteAcceptScreen() {
             </View>
             <Text style={styles.welcomeText}>You're Invited!</Text>
             <Text style={styles.roleText}>
-              Join VinayFit as a {inviteData.role.charAt(0).toUpperCase() + inviteData.role.slice(1)}
+              Join BODIQU as a {inviteData.role.charAt(0).toUpperCase() + inviteData.role.slice(1)}
             </Text>
             
             {inviteData.trial > 0 && (

@@ -30,7 +30,7 @@ export default function SignInScreen() {
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme);
   const styles = createStyles(colors);
-  const { signIn, user} = useAuth();
+  const { signIn, user } = useAuth();
   const { userRole } = useUserRole();
 
   const [email, setEmail] = useState('');
@@ -49,7 +49,7 @@ export default function SignInScreen() {
       // You can customize this logic for different roles
       const checkProfileStatus = async () => {
         const userId = user?.id;
-        console.log(userId)
+        console.log(userId);
         if (!userId) return;
 
         const { data, error } = await supabase
@@ -66,7 +66,7 @@ export default function SignInScreen() {
           router.replace('/(tabs)'); // normal app flow
         }
       };
-checkProfileStatus();
+      checkProfileStatus();
     }
   }, [userRole]);
 

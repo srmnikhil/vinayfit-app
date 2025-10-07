@@ -56,7 +56,7 @@ export default function AboutScreen() {
           <View style={styles.logo}>
             <Text style={styles.logoText}>VF</Text>
           </View>
-          <Text style={styles.appName}>VinayFit</Text>
+          <Text style={styles.appName}>BODIQU</Text>
           <Text style={styles.version}>Version 1.0.0</Text>
         </View>
 
@@ -64,7 +64,7 @@ export default function AboutScreen() {
         <View style={styles.missionContainer}>
           <Text style={styles.missionTitle}>Our Mission</Text>
           <Text style={styles.missionText}>
-            VinayFit is dedicated to making fitness accessible, enjoyable, and effective for everyone. 
+            BODIQU is dedicated to making fitness accessible, enjoyable, and effective for everyone. 
             We believe that with the right tools, guidance, and community support, anyone can achieve 
             their health and fitness goals.
           </Text>
@@ -118,7 +118,7 @@ export default function AboutScreen() {
         {/* Copyright */}
         <View style={styles.copyrightContainer}>
           <Text style={styles.copyrightText}>
-            © 2025 VinayFit. All rights reserved.
+            © 2025 BODIQU. All rights reserved.
           </Text>
           <Text style={styles.copyrightSubtext}>
             Made with ❤️ for fitness enthusiasts

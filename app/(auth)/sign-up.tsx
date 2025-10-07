@@ -161,7 +161,7 @@ export default function SignUpScreen() {
         }
         Alert.alert(
           'Account Created! 🎉',
-          'Welcome to VinayFit! Your account has been created successfully.',
+          'Welcome to BODIQO! Your account has been created successfully.',
           [
             {
               text: 'Get Started',
@@ -225,7 +225,7 @@ export default function SignUpScreen() {
             </TouchableOpacity>
             <Text style={styles.title}>Create Account</Text>
             <Text style={styles.subtitle}>
-              Join VinayFit and start your fitness journey
+              Join BODIQU and start your fitness journey
             </Text>
           </View>
 

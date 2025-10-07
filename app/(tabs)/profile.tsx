@@ -68,9 +68,6 @@ export default function ProfileView() {
   const [trainerRating, setTrainerRating] = useState<number | null>(null);
   const [reviewCount, setReviewCount] = useState<number | null>(null);
 
-  // if(userRole === "leads"){
-
-  // }
 
   useEffect(() => {
     const fetchTrainerRating = async () => {

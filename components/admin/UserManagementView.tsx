@@ -404,7 +404,7 @@ export default function UserManagementView() {
                 style={styles.textArea}
                 value={inviteData.customMessage}
                 onChangeText={(text) => setInviteData(prev => ({ ...prev, customMessage: text }))}
-                placeholder="Welcome to VinayFit! We're excited to have you join our team..."
+                placeholder="Welcome to BODIQU! We're excited to have you join our team..."
                 placeholderTextColor={colors.textTertiary}
                 multiline
                 numberOfLines={4}

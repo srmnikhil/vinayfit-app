@@ -11,6 +11,7 @@ import TodayTrainerViewWithData from '@/components/today/TodayTrainerViewWithDat
 import TodayNutritionistViewWithData from '@/components/today/TodayNutritionistViewWithData';
 import TodayAdminViewWithData from '@/components/today/TodayAdminViewWithData';
 import TodayClientViewWithData from '@/components/today/TodayClientViewWithData';
+import TodayClientView from '@/components/today/TodayClientView';
 import TodayTrainerViewNew from '@/components/today/TodayTrainerViewNew';
 import LeadsView from '@/components/today/LeadsView';
 import Loader from '@/components/Loader';
@@ -47,7 +48,7 @@ export default function TodayScreen() {
     case 'leads':
       return <LeadsView />;
     case 'client':
-      return <TodayClientViewWithData />;
+      return <TodayClientView />;
     case 'trainer':
       return <TodayTrainerViewNew />;
     case 'nutritionist':
@@ -62,7 +63,7 @@ export default function TodayScreen() {
         >
           <View style={styles.errorContainer}>
             <Text style={[styles.errorTitle, { color: colors.text }]}>
-              Welcome to VinayFit
+              Welcome to BODIQU
             </Text>
             <Text style={[styles.errorText, { color: colors.textSecondary }]}>
               Please complete your profile setup to continue. "You can do this

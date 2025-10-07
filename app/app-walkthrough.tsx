@@ -41,7 +41,7 @@ export default function AppWalkthroughScreen() {
   const videos: WalkthroughVideo[] = [
     {
       id: '1',
-      title: 'Welcome to VinayFit',
+      title: 'Welcome to BODIQU',
       description: 'Get started with your fitness journey',
       duration: '3:45',
       thumbnail: 'https://images.pexels.com/photos/416778/pexels-photo-416778.jpeg',
@@ -96,7 +96,7 @@ export default function AppWalkthroughScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Introduction */}
         <View style={styles.introduction}>
-          <Text style={styles.introTitle}>Learn VinayFit</Text>
+          <Text style={styles.introTitle}>Learn BODIQU</Text>
           <Text style={styles.introDescription}>
             Watch these helpful videos to get the most out of your fitness app experience.
           </Text>

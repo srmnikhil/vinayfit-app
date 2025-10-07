@@ -36,7 +36,7 @@ export default function WelcomeScreen() {
             </LinearGradient>
           </View>
 
-          <Text style={styles.appName}>VinayFit</Text>
+          <Text style={styles.appName}>BODIQU</Text>
           <Text style={styles.tagline}>Transform Your Fitness Journey</Text>
         </View>
 

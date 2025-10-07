@@ -9,10 +9,10 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  Plus, 
-  Footprints, 
-  Target, 
+import {
+  Plus,
+  Footprints,
+  Target,
   UtensilsCrossed,
   TrendingUp,
   Calendar,
@@ -22,7 +22,7 @@ import {
   Clock,
   ChevronRight,
   Flame,
-  Users
+  Users,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme, getColors } from '../../hooks/useColorScheme';
@@ -32,27 +32,36 @@ import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { getClientTrainingSessions } from '../../lib/trainingSessionQueries';
 import { TrainingSession } from '../../types/workout';
+import Loader from '@/components/Loader';
+
 export default function TodayClientViewNew() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = getColors(colorScheme);
   const styles = createStyles(colors);
   const { data, loading, error, refreshData } = useTodayDataNew();
+
   const { user } = useAuth();
   const [showMissedWorkout, setShowMissedWorkout] = useState(true);
-  const [todaysTrainingSessions, setTodaysTrainingSessions] = useState<TrainingSession[]>([]);
-  
+  const [todaysTrainingSessions, setTodaysTrainingSessions] = useState<
+    TrainingSession[]
+  >([]);
+
   const clientData = data as TodayClientData;
-  
+
   useEffect(() => {
     const loadTodaysTrainingSessions = async () => {
       if (!clientData?.profile?.id) return;
 
       try {
         const today = new Date().toISOString().split('T')[0];
-        const sessions = await getClientTrainingSessions(clientData.profile.id, today, today);
+        const sessions = await getClientTrainingSessions(
+          clientData.profile.id,
+          today,
+          today
+        );
         setTodaysTrainingSessions(sessions);
       } catch (error) {
-        console.error('Error loading today\'s training sessions:', error);
+        console.error("Error loading today's training sessions:", error);
       }
     };
 
@@ -65,11 +74,13 @@ export default function TodayClientViewNew() {
   console.log('clientData.workoutSessions:', clientData?.workoutSessions);
   const getCurrentDate = () => {
     const date = new Date();
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric'
-    }).toUpperCase();
+    return date
+      .toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+      })
+      .toUpperCase();
   };
 
   const getGreeting = () => {
@@ -85,8 +96,10 @@ export default function TodayClientViewNew() {
         <View style={styles.exerciseInfo}>
           <Text style={styles.exerciseName}>{exercise.exercise.name}</Text>
           <Text style={styles.exerciseDetails}>
-            Sets: {exercise.sets_config?.length || 0}{'  '}
-            Reps: {exercise.sets_config?.[0]?.reps || 'N/A'}{'  '}
+            Sets: {exercise.sets_config?.length || 0}
+            {'  '}
+            Reps: {exercise.sets_config?.[0]?.reps || 'N/A'}
+            {'  '}
             Weight: {exercise.sets_config?.[0]?.weight || 'N/A'}
           </Text>
         </View>
@@ -103,7 +116,9 @@ export default function TodayClientViewNew() {
     }
 
     const getDayName = (dateStr: string) => {
-      return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short' });
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        weekday: 'short',
+      });
     };
 
     const groupByDay = (sessions: any[]) => {
@@ -130,7 +145,7 @@ export default function TodayClientViewNew() {
                 <Text style={styles.sessionTime}>
                   {new Date(session.start_time).toLocaleTimeString('en-US', {
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
                   })}
                 </Text>
                 <Text style={styles.sessionStatus}>
@@ -148,7 +163,9 @@ export default function TodayClientViewNew() {
     if (!clientData.todayPlan?.template) {
       return (
         <View style={styles.noPlanContainer}>
-          <Text style={styles.noPlanText}>No workout plan scheduled for today</Text>
+          <Text style={styles.noPlanText}>
+            No workout plan scheduled for today
+          </Text>
           <TouchableOpacity style={styles.refreshButton} onPress={refreshData}>
             <Text style={styles.refreshButtonText}>Refresh</Text>
           </TouchableOpacity>
@@ -173,21 +190,29 @@ export default function TodayClientViewNew() {
 
   // Get today's workout
   // Find the first scheduled workout session for today that has a template
-  const todaysWorkoutSession = todaysTrainingSessions.find(session => {
-    return session.status === 'scheduled' || session.status === 'completed';
-  }) || clientData?.workoutSessions?.find(session => {
-    const sessionDate = new Date(session.scheduled_date).toDateString();
-    const today = new Date().toDateString();
-    return sessionDate === today && session.template_id && session.template && !session.completed;
-  });
+  const todaysWorkoutSession =
+    todaysTrainingSessions.find((session) => {
+      return session.status === 'scheduled' || session.status === 'completed';
+    }) ||
+    clientData?.workoutSessions?.find((session) => {
+      const sessionDate = new Date(session.scheduled_date).toDateString();
+      const today = new Date().toDateString();
+      return (
+        sessionDate === today &&
+        session.template_id &&
+        session.template &&
+        !session.completed
+      );
+    });
 
-  const completedWorkouts = clientData?.workoutSessions?.filter(session => session.completed) || [];
-  console.log('Today\'s workout sessions:', {
+  const completedWorkouts =
+    clientData?.workoutSessions?.filter((session) => session.completed) || [];
+  console.log("Today's workout sessions:", {
     allSessions: clientData?.workoutSessions,
     todaySession: todaysWorkoutSession,
-    today: new Date().toDateString()
+    today: new Date().toDateString(),
   });
-  
+
   // Get active goal
   const activeGoal = clientData?.activeGoals?.[0] || {
     title: 'Set your first goal',
@@ -214,7 +239,10 @@ export default function TodayClientViewNew() {
   const handleStartWorkout = () => {
     if (todaysWorkoutSession) {
       // Handle both training sessions and workout sessions
-      if ('template_id' in todaysWorkoutSession && todaysWorkoutSession.template_id) {
+      if (
+        'template_id' in todaysWorkoutSession &&
+        todaysWorkoutSession.template_id
+      ) {
         router.push(`/start-workout/${todaysWorkoutSession.id}`);
       } else {
         // For training sessions without templates, navigate to session detail
@@ -226,8 +254,13 @@ export default function TodayClientViewNew() {
   const handleWorkoutCardPress = () => {
     if (todaysWorkoutSession) {
       // Handle both training sessions and workout sessions
-      if ('template_id' in todaysWorkoutSession && todaysWorkoutSession.template_id) {
-        router.push(`/todays-workout/${todaysWorkoutSession.template_id}` as any);
+      if (
+        'template_id' in todaysWorkoutSession &&
+        todaysWorkoutSession.template_id
+      ) {
+        router.push(
+          `/todays-workout/${todaysWorkoutSession.template_id}` as any
+        );
       } else {
         // For training sessions without templates, navigate to session detail
         router.push(`/workout-detail/${todaysWorkoutSession.id}`);
@@ -265,7 +298,11 @@ export default function TodayClientViewNew() {
     if (!todaysWorkoutSession) {
       return (
         <LinearGradient
-          colors={colorScheme === 'dark' ? ['#1E40AF', '#3730A3'] : ['#667EEA', '#764BA2']}
+          colors={
+            colorScheme === 'dark'
+              ? ['#1E40AF', '#3730A3']
+              : ['#667EEA', '#764BA2']
+          }
           style={styles.restDayCard}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -282,26 +319,43 @@ export default function TodayClientViewNew() {
 
     // Handle both training sessions and workout sessions
     const template = todaysWorkoutSession.template;
-    const sessionName = template?.name || todaysWorkoutSession.type || todaysWorkoutSession.session_type || 'Training Session';
-    const sessionDuration = template?.estimated_duration_minutes || todaysWorkoutSession.duration_minutes || todaysWorkoutSession.duration || 60;
+    const sessionName =
+      template?.name ||
+      todaysWorkoutSession.type ||
+      todaysWorkoutSession.session_type ||
+      'Training Session';
+    const sessionDuration =
+      template?.estimated_duration_minutes ||
+      todaysWorkoutSession.duration_minutes ||
+      todaysWorkoutSession.duration ||
+      60;
     const sessionExercises = template?.exercises || [];
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.workoutCardContainer}
         onPress={handleWorkoutCardPress}
         activeOpacity={0.9}
       >
         <LinearGradient
-          colors={colorScheme === 'dark' ? ['#BE185D', '#BE123C'] : ['#F093FB', '#F5576C']}
+          colors={
+            colorScheme === 'dark'
+              ? ['#BE185D', '#BE123C']
+              : ['#F093FB', '#F5576C']
+          }
           style={styles.workoutCard}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
           {/* Hero Image */}
           <View style={styles.workoutHeroContainer}>
-            <Image 
-              source={{ uri: template?.image_url || template?.thumbnail_url || 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800' }}
+            <Image
+              source={{
+                uri:
+                  template?.image_url ||
+                  template?.thumbnail_url ||
+                  'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800',
+              }}
               style={styles.workoutHeroImage}
             />
             <View style={styles.workoutOverlay}>
@@ -311,7 +365,9 @@ export default function TodayClientViewNew() {
                 <View style={styles.workoutMeta}>
                   <View style={styles.metaItem}>
                     <Dumbbell size={16} color="rgba(255, 255, 255, 0.8)" />
-                    <Text style={styles.metaText}>{sessionExercises.length} exercises</Text>
+                    <Text style={styles.metaText}>
+                      {sessionExercises.length} exercises
+                    </Text>
                   </View>
                   <View style={styles.metaItem}>
                     <Clock size={16} color="rgba(255, 255, 255, 0.8)" />
@@ -319,7 +375,10 @@ export default function TodayClientViewNew() {
                   </View>
                 </View>
               </View>
-              <TouchableOpacity style={styles.playButton} onPress={handleStartWorkout}>
+              <TouchableOpacity
+                style={styles.playButton}
+                onPress={handleStartWorkout}
+              >
                 <Play size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
@@ -329,26 +388,35 @@ export default function TodayClientViewNew() {
           <View style={styles.exercisePreview}>
             <Text style={styles.exercisePreviewTitle}>Exercises Preview</Text>
             {sessionExercises.length > 0 ? (
-              <ScrollView 
-                horizontal 
+              <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.exerciseScrollView}
                 contentContainerStyle={styles.exerciseScrollContent}
               >
-                {sessionExercises.slice(0, 5).map((exercise: any, index: number) => (
-                  <View key={exercise.id} style={styles.exercisePreviewItem}>
-                    <Image 
-                      source={{ uri: exercise.exercise.image_url || getExerciseImage(exercise.exercise.name, index) }}
-                      style={styles.exercisePreviewImage}
-                    />
-                    <Text style={styles.exercisePreviewName} numberOfLines={2}>
-                      {exercise.exercise.name}
-                    </Text>
-                    <Text style={styles.exercisePreviewSets}>
-                      {exercise.sets_config.length} sets
-                    </Text>
-                  </View>
-                ))}
+                {sessionExercises
+                  .slice(0, 5)
+                  .map((exercise: any, index: number) => (
+                    <View key={exercise.id} style={styles.exercisePreviewItem}>
+                      <Image
+                        source={{
+                          uri:
+                            exercise.exercise.image_url ||
+                            getExerciseImage(exercise.exercise.name, index),
+                        }}
+                        style={styles.exercisePreviewImage}
+                      />
+                      <Text
+                        style={styles.exercisePreviewName}
+                        numberOfLines={2}
+                      >
+                        {exercise.exercise.name}
+                      </Text>
+                      <Text style={styles.exercisePreviewSets}>
+                        {exercise.sets_config.length} sets
+                      </Text>
+                    </View>
+                  ))}
                 {sessionExercises.length > 5 && (
                   <View style={styles.moreExercisesItem}>
                     <View style={styles.moreExercisesCircle}>
@@ -362,17 +430,27 @@ export default function TodayClientViewNew() {
               </ScrollView>
             ) : (
               <View style={styles.noExercisesContainer}>
-                <Text style={styles.noExercisesText}>Custom training session</Text>
-                <Text style={styles.noExercisesSubtext}>Details will be provided by your trainer</Text>
+                <Text style={styles.noExercisesText}>
+                  Custom training session
+                </Text>
+                <Text style={styles.noExercisesSubtext}>
+                  Details will be provided by your trainer
+                </Text>
               </View>
             )}
-            
+
             <View style={styles.workoutActions}>
-              <TouchableOpacity style={styles.viewDetailsButton} onPress={handleWorkoutCardPress}>
+              <TouchableOpacity
+                style={styles.viewDetailsButton}
+                onPress={handleWorkoutCardPress}
+              >
                 <Text style={styles.viewDetailsText}>View Details</Text>
                 <ChevronRight size={16} color="rgba(255, 255, 255, 0.8)" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.startWorkoutButton} onPress={handleStartWorkout}>
+              <TouchableOpacity
+                style={styles.startWorkoutButton}
+                onPress={handleStartWorkout}
+              >
                 <Play size={16} color="#FFFFFF" />
                 <Text style={styles.startWorkoutText}>Start Workout</Text>
               </TouchableOpacity>
@@ -383,14 +461,9 @@ export default function TodayClientViewNew() {
     );
   };
 
-
-  if (loading) {
+  if (loading || !data) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading your data...</Text>
-        </View>
-      </SafeAreaView>
+        <Loader label="Fetching your fitness data..." />
     );
   }
 
@@ -410,8 +483,8 @@ export default function TodayClientViewNew() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView 
-        style={[styles.scrollView, { backgroundColor: colors.background }]} 
+      <ScrollView
+        style={[styles.scrollView, { backgroundColor: colors.background }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={refreshData} />
@@ -438,28 +511,31 @@ export default function TodayClientViewNew() {
               <View>
                 <Text style={styles.goalTitle}>{activeGoal.title}</Text>
                 <Text style={styles.goalSubtitle}>
-                  {daysLeft > 0 ? `${daysLeft} days left` : 'No target date'} • {activeGoal.progress_percentage}% complete
+                  {daysLeft > 0 ? `${daysLeft} days left` : 'No target date'} •{' '}
+                  {activeGoal.progress_percentage}% complete
                 </Text>
               </View>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addGoalButton}
               onPress={() => router.push('/set-fitness-goal')}
             >
               <Plus size={16} color={colors.primary} />
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.goalProgressContainer}>
             <View style={styles.goalProgressBar}>
-              <View 
+              <View
                 style={[
-                  styles.goalProgressFill, 
-                  { width: `${activeGoal.progress_percentage}%` }
-                ]} 
+                  styles.goalProgressFill,
+                  { width: `${activeGoal.progress_percentage}%` },
+                ]}
               />
             </View>
-            <Text style={styles.goalProgressText}>{activeGoal.progress_percentage}%</Text>
+            <Text style={styles.goalProgressText}>
+              {activeGoal.progress_percentage}%
+            </Text>
           </View>
 
           {daysLeft > 0 && (
@@ -481,7 +557,7 @@ export default function TodayClientViewNew() {
                 You haven't completed any workouts today
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowMissedWorkout(false)}
               style={styles.alertClose}
             >
@@ -496,25 +572,27 @@ export default function TodayClientViewNew() {
             <Text style={styles.cardTitle}>Steps tracker</Text>
             <Footprints size={24} color={colors.primary} />
           </View>
-          
+
           <View style={styles.stepsContent}>
             <View style={styles.stepsInfo}>
-              <Text style={styles.stepsNumber}>
-                {steps.toLocaleString()}
+              <Text style={styles.stepsNumber}>{steps.toLocaleString()}</Text>
+              <Text style={styles.stepsGoal}>
+                / {stepGoal.toLocaleString()} steps
               </Text>
-              <Text style={styles.stepsGoal}>/ {stepGoal.toLocaleString()} steps</Text>
             </View>
-            
+
             <View style={styles.progressContainer}>
               <View style={styles.progressBackground}>
-                <View 
+                <View
                   style={[
-                    styles.progressFill, 
-                    { width: `${Math.min(stepProgress, 100)}%` }
-                  ]} 
+                    styles.progressFill,
+                    { width: `${Math.min(stepProgress, 100)}%` },
+                  ]}
                 />
               </View>
-              <Text style={styles.progressText}>{Math.round(stepProgress)}%</Text>
+              <Text style={styles.progressText}>
+                {Math.round(stepProgress)}%
+              </Text>
             </View>
           </View>
         </View>
@@ -525,16 +603,16 @@ export default function TodayClientViewNew() {
             <Text style={styles.cardTitle}>Quick Actions</Text>
             <Dumbbell size={24} color={colors.success} />
           </View>
-          
+
           <View style={styles.actionGrid}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => router.push('/templates')}
             >
               <Text style={styles.actionButtonText}>View Templates</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => router.push('/workout-history')}
             >
@@ -549,12 +627,15 @@ export default function TodayClientViewNew() {
             <Text style={styles.cardTitle}>Macros</Text>
             <Target size={24} color={colors.success} />
           </View>
-          
+
           <Text style={styles.cardSubtitle}>
             Start by setting your daily goal
           </Text>
-          
-          <TouchableOpacity style={styles.actionButton} onPress={handleSetMacrosGoal}>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleSetMacrosGoal}
+          >
             <Text style={styles.actionButtonText}>Set daily goal</Text>
           </TouchableOpacity>
         </View>
@@ -565,11 +646,9 @@ export default function TodayClientViewNew() {
             <Text style={styles.cardTitle}>Food Journal</Text>
             <UtensilsCrossed size={24} color={colors.warning} />
           </View>
-          
-          <Text style={styles.cardSubtitle}>
-            What did you eat today?
-          </Text>
-          
+
+          <Text style={styles.cardSubtitle}>What did you eat today?</Text>
+
           <TouchableOpacity style={styles.actionButton} onPress={handleAddMeal}>
             <Text style={styles.actionButtonText}>Add meal</Text>
           </TouchableOpacity>
@@ -581,18 +660,24 @@ export default function TodayClientViewNew() {
             <Text style={styles.cardTitle}>Today's Progress</Text>
             <TrendingUp size={24} color={colors.error} />
           </View>
-          
+
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Text style={styles.statNumber}>{completedWorkouts.length}</Text>
               <Text style={styles.statLabel}>Workouts</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{clientData?.todayStats?.calories_consumed || 0}</Text>
+              <Text style={styles.statNumber}>
+                {clientData?.todayStats?.calories_consumed || 0}
+              </Text>
               <Text style={styles.statLabel}>Calories</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{((clientData?.todayStats?.water_intake_ml || 0) / 1000).toFixed(1)}</Text>
+              <Text style={styles.statNumber}>
+                {(
+                  (clientData?.todayStats?.water_intake_ml || 0) / 1000
+                ).toFixed(1)}
+              </Text>
               <Text style={styles.statLabel}>Water (L)</Text>
             </View>
           </View>
@@ -605,18 +690,22 @@ export default function TodayClientViewNew() {
               <Text style={styles.cardTitle}>Your Team</Text>
               <Users size={24} color={colors.info} />
             </View>
-            
+
             {clientData.clientAssignment.trainer && (
               <View style={styles.teamMember}>
                 <Text style={styles.teamMemberRole}>Trainer</Text>
-                <Text style={styles.teamMemberName}>{clientData.clientAssignment.trainer.full_name}</Text>
+                <Text style={styles.teamMemberName}>
+                  {clientData.clientAssignment.trainer.full_name}
+                </Text>
               </View>
             )}
-            
+
             {clientData.clientAssignment.nutritionist && (
               <View style={styles.teamMember}>
                 <Text style={styles.teamMemberRole}>Nutritionist</Text>
-                <Text style={styles.teamMemberName}>{clientData.clientAssignment.nutritionist.full_name}</Text>
+                <Text style={styles.teamMemberName}>
+                  {clientData.clientAssignment.nutritionist.full_name}
+                </Text>
               </View>
             )}
           </View>
@@ -634,628 +723,629 @@ export default function TodayClientViewNew() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  weeklyWorkoutsContainer: {
-    padding: 16,
-    backgroundColor: colors.background,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 16,
-  },
-  dayContainer: {
-    marginBottom: 16,
-  },
-  dayTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  sessionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 12,
-    backgroundColor: colors.card,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  sessionTime: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  sessionStatus: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  planContainer: {
-    padding: 16,
-    backgroundColor: colors.background,
-  },
-  planTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 16,
-  },
-  exercisesContainer: {
-    flex: 1,
-  },
-  exerciseItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: colors.card,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  exerciseDetails: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  exerciseProgress: {
-    alignItems: 'flex-end',
-  },
-  exerciseStatus: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  noPlanContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  noPlanText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  refreshButton: {
-    padding: 12,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-  },
-  refreshButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  errorTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 20,
-    color: colors.text,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  errorText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  retryButtonText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  dateText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: colors.textTertiary,
-    letterSpacing: 0.5,
-  },
-  greetingText: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 28,
-    color: colors.text,
-    marginTop: 4,
-  },
-  restDayCard: {
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 16,
-    padding: 24,
-  },
-  restDayContent: {
-    alignItems: 'flex-start',
-  },
-  restDayLabel: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  restDayMessage: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: '#FFFFFF',
-    lineHeight: 24,
-  },
-  workoutCardContainer: {
-    marginHorizontal: 20,
-    marginBottom: 16,
-  },
-  workoutCard: {
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  workoutHeroContainer: {
-    height: 200,
-    position: 'relative',
-  },
-  workoutHeroImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  workoutOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    padding: 20,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-  },
-  workoutInfo: {
-    flex: 1,
-  },
-  workoutLabel: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  workoutName: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 24,
-    color: '#FFFFFF',
-    marginBottom: 12,
-  },
-  workoutMeta: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  playButton: {
-    width: 56,
-    height: 56,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  exercisePreview: {
-    padding: 20,
-  },
-  exercisePreviewTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 16,
-  },
-  exerciseScrollView: {
-    marginBottom: 20,
-  },
-  exerciseScrollContent: {
-    paddingRight: 20,
-  },
-  exercisePreviewItem: {
-    width: 80,
-    marginRight: 12,
-    alignItems: 'center',
-  },
-  exercisePreviewImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  exercisePreviewName: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-    marginBottom: 4,
-    lineHeight: 12,
-  },
-  exercisePreviewSets: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 9,
-    color: 'rgba(255, 255, 255, 0.6)',
-    textAlign: 'center',
-  },
-  moreExercisesItem: {
-    width: 80,
-    alignItems: 'center',
-  },
-  moreExercisesCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  moreExercisesText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
-    color: '#FFFFFF',
-  },
-  moreExercisesLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-  },
-  noExercisesContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  noExercisesText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 4,
-  },
-  noExercisesSubtext: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
-  },
-  workoutActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  viewDetailsButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  viewDetailsText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginRight: 4,
-  },
-  startWorkoutButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  startWorkoutText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
-    color: colors.text,
-    marginLeft: 6,
-  },
-  alertCard: {
-    backgroundColor: colors.surface,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: colors.error,
-  },
-  alertContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  alertIcon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  alertText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: colors.text,
-    flex: 1,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: colors.text,
-  },
-  cardSubtitle: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  goalCard: {
-    backgroundColor: colors.surface,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  goalTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-  },
-  goalEmoji: {
-    fontSize: 32,
-    marginRight: 12,
-  },
-  goalTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 16,
-    color: colors.text,
-    marginBottom: 4,
-  },
-  goalSubtitle: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  addGoalButton: {
-    width: 32,
-    height: 32,
-    backgroundColor: colors.surfaceSecondary,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  goalProgressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  goalProgressBar: {
-    flex: 1,
-    height: 8,
-    backgroundColor: colors.borderLight,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  goalProgressFill: {
-    height: '100%',
-    backgroundColor: colors.success,
-    borderRadius: 4,
-  },
-  goalProgressText: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 14,
-    color: colors.success,
-    minWidth: 40,
-  },
-  goalCountdown: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  goalCountdownText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  alertClose: {
-    padding: 4,
-  },
-  stepsContent: {
-    alignItems: 'flex-start',
-  },
-  stepsInfo: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 16,
-  },
-  stepsNumber: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 32,
-    color: colors.text,
-  },
-  stepsGoal: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginLeft: 4,
-  },
-  progressContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  progressBackground: {
-    flex: 1,
-    height: 8,
-    backgroundColor: colors.borderLight,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 4,
-  },
-  progressText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 12,
-    color: colors.primary,
-    minWidth: 35,
-  },
-  actionGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
-    color: colors.text,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 24,
-    color: colors.text,
-  },
-  statLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
-  teamMember: {
-    marginBottom: 12,
-  },
-  teamMemberRole: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginBottom: 2,
-  },
-  teamMemberName: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: colors.text,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 90,
-    right: 20,
-    width: 56,
-    height: 56,
-    backgroundColor: colors.primary,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 4,
+    weeklyWorkoutsContainer: {
+      padding: 16,
+      backgroundColor: colors.background,
     },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-});
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 16,
+    },
+    dayContainer: {
+      marginBottom: 16,
+    },
+    dayTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    sessionItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 12,
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    sessionTime: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    sessionStatus: {
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    planContainer: {
+      padding: 16,
+      backgroundColor: colors.background,
+    },
+    planTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 16,
+    },
+    exercisesContainer: {
+      flex: 1,
+    },
+    exerciseItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 12,
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    exerciseInfo: {
+      flex: 1,
+    },
+    exerciseName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    exerciseDetails: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    exerciseProgress: {
+      alignItems: 'flex-end',
+    },
+    exerciseStatus: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    noPlanContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+    },
+    noPlanText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 16,
+    },
+    refreshButton: {
+      padding: 12,
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+    },
+    refreshButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      textAlign: 'center',
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+    },
+    errorTitle: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 20,
+      color: colors.text,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    errorText: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 24,
+      marginBottom: 24,
+    },
+    retryButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+    },
+    retryButtonText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 16,
+      color: '#FFFFFF',
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 20,
+    },
+    dateText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 12,
+      color: colors.textTertiary,
+      letterSpacing: 0.5,
+    },
+    greetingText: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 28,
+      color: colors.text,
+      marginTop: 4,
+    },
+    restDayCard: {
+      marginHorizontal: 20,
+      marginBottom: 16,
+      borderRadius: 16,
+      padding: 24,
+    },
+    restDayContent: {
+      alignItems: 'flex-start',
+    },
+    restDayLabel: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 12,
+      color: 'rgba(255, 255, 255, 0.8)',
+      letterSpacing: 1,
+      marginBottom: 8,
+    },
+    restDayMessage: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+      color: '#FFFFFF',
+      lineHeight: 24,
+    },
+    workoutCardContainer: {
+      marginHorizontal: 20,
+      marginBottom: 16,
+    },
+    workoutCard: {
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    workoutHeroContainer: {
+      height: 200,
+      position: 'relative',
+    },
+    workoutHeroImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    workoutOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      padding: 20,
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+    },
+    workoutInfo: {
+      flex: 1,
+    },
+    workoutLabel: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 12,
+      color: 'rgba(255, 255, 255, 0.8)',
+      letterSpacing: 1,
+      marginBottom: 8,
+    },
+    workoutName: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 24,
+      color: '#FFFFFF',
+      marginBottom: 12,
+    },
+    workoutMeta: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    metaItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    metaText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      color: 'rgba(255, 255, 255, 0.8)',
+    },
+    playButton: {
+      width: 56,
+      height: 56,
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      borderRadius: 28,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    exercisePreview: {
+      padding: 20,
+    },
+    exercisePreviewTitle: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 16,
+      color: 'rgba(255, 255, 255, 0.9)',
+      marginBottom: 16,
+    },
+    exerciseScrollView: {
+      marginBottom: 20,
+    },
+    exerciseScrollContent: {
+      paddingRight: 20,
+    },
+    exercisePreviewItem: {
+      width: 80,
+      marginRight: 12,
+      alignItems: 'center',
+    },
+    exercisePreviewImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    exercisePreviewName: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 10,
+      color: 'rgba(255, 255, 255, 0.8)',
+      textAlign: 'center',
+      marginBottom: 4,
+      lineHeight: 12,
+    },
+    exercisePreviewSets: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 9,
+      color: 'rgba(255, 255, 255, 0.6)',
+      textAlign: 'center',
+    },
+    moreExercisesItem: {
+      width: 80,
+      alignItems: 'center',
+    },
+    moreExercisesCircle: {
+      width: 60,
+      height: 60,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    moreExercisesText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 14,
+      color: '#FFFFFF',
+    },
+    moreExercisesLabel: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 10,
+      color: 'rgba(255, 255, 255, 0.8)',
+      textAlign: 'center',
+    },
+    noExercisesContainer: {
+      alignItems: 'center',
+      paddingVertical: 20,
+    },
+    noExercisesText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 14,
+      color: 'rgba(255, 255, 255, 0.9)',
+      marginBottom: 4,
+    },
+    noExercisesSubtext: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 12,
+      color: 'rgba(255, 255, 255, 0.7)',
+      textAlign: 'center',
+    },
+    workoutActions: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    viewDetailsButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    },
+    viewDetailsText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 14,
+      color: 'rgba(255, 255, 255, 0.8)',
+      marginRight: 4,
+    },
+    startWorkoutButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#FFFFFF',
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    },
+    startWorkoutText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 14,
+      color: colors.text,
+      marginLeft: 6,
+    },
+    alertCard: {
+      backgroundColor: colors.surface,
+      marginHorizontal: 20,
+      marginBottom: 16,
+      borderRadius: 12,
+      padding: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderLeftWidth: 4,
+      borderLeftColor: colors.error,
+    },
+    alertContent: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    alertIcon: {
+      fontSize: 16,
+      marginRight: 8,
+    },
+    alertText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      color: colors.text,
+      flex: 1,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      marginHorizontal: 20,
+      marginBottom: 16,
+      borderRadius: 12,
+      padding: 20,
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    cardTitle: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+      color: colors.text,
+    },
+    cardSubtitle: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 16,
+      lineHeight: 20,
+    },
+    goalCard: {
+      backgroundColor: colors.surface,
+      marginHorizontal: 20,
+      marginBottom: 16,
+      borderRadius: 16,
+      padding: 20,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    goalHeader: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    goalTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      flex: 1,
+    },
+    goalEmoji: {
+      fontSize: 32,
+      marginRight: 12,
+    },
+    goalTitle: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 16,
+      color: colors.text,
+      marginBottom: 4,
+    },
+    goalSubtitle: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    addGoalButton: {
+      width: 32,
+      height: 32,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    goalProgressContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    goalProgressBar: {
+      flex: 1,
+      height: 8,
+      backgroundColor: colors.borderLight,
+      borderRadius: 4,
+      marginRight: 12,
+    },
+    goalProgressFill: {
+      height: '100%',
+      backgroundColor: colors.success,
+      borderRadius: 4,
+    },
+    goalProgressText: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 14,
+      color: colors.success,
+      minWidth: 40,
+    },
+    goalCountdown: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    goalCountdownText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    alertClose: {
+      padding: 4,
+    },
+    stepsContent: {
+      alignItems: 'flex-start',
+    },
+    stepsInfo: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      marginBottom: 16,
+    },
+    stepsNumber: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 32,
+      color: colors.text,
+    },
+    stepsGoal: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 16,
+      color: colors.textSecondary,
+      marginLeft: 4,
+    },
+    progressContainer: {
+      width: '100%',
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    progressBackground: {
+      flex: 1,
+      height: 8,
+      backgroundColor: colors.borderLight,
+      borderRadius: 4,
+      marginRight: 12,
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: 4,
+    },
+    progressText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 12,
+      color: colors.primary,
+      minWidth: 35,
+    },
+    actionGrid: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    actionButton: {
+      flex: 1,
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+    },
+    actionButtonText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 14,
+      color: colors.text,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    statItem: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    statNumber: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 24,
+      color: colors.text,
+    },
+    statLabel: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    teamMember: {
+      marginBottom: 12,
+    },
+    teamMemberRole: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginBottom: 2,
+    },
+    teamMemberName: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 16,
+      color: colors.text,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 90,
+      right: 20,
+      width: 56,
+      height: 56,
+      backgroundColor: colors.primary,
+      borderRadius: 28,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+  });
