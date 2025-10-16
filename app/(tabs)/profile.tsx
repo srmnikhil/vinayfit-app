@@ -5,6 +5,7 @@ import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { MembershipSheet } from '@/components/MembershipSheet';
 import { MetricsSection } from '@/components/MetricsSection';
 import { useAuth } from '@/contexts/AuthContext';
+import { router } from 'expo-router';
 
 export default function Profile() {
   const [membershipOpen, setMembershipOpen] = useState(false);
@@ -29,8 +30,12 @@ export default function Profile() {
     ]);
   };
 
+  const handleEdit = () => {
+    router.push("/profile-settings")
+  }
+
   const settings = [
-    { label: 'Edit Profile', isLogout: false },
+    { label: 'Edit Profile', isLogout: false, onPress: handleEdit },
     { label: 'Notification Preferences', isLogout: false },
     { label: 'Connect Health Data', isLogout: false },
     { label: 'Logout', isLogout: true, onPress: handleLogout },
