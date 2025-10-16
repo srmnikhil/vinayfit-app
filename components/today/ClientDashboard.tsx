@@ -17,6 +17,7 @@ import { AnimatedButton } from '../AnimatedButton';
 import { AnimatedPressable } from '../AnimatedPressable';
 import { ProgressRing } from '../ProgressRing';
 import { MetricsSection } from '../MetricsSection';
+import { router } from 'expo-router';
 
 export default function ClientDashboard() {
   const { data, loading, error, refreshData } = useTodayDataNew();
@@ -70,7 +71,7 @@ export default function ClientDashboard() {
               5
             </Text>
           </View>
-          <Bell color="white" size={22} strokeWidth={1} />
+          <Bell color="white" size={22} strokeWidth={1.5} onPress={()=> router.push('/notifications')} />
         </View>
       </View>
       <ScrollView
