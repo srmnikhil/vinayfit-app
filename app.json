@@ -76,7 +76,8 @@
       "router": {},
       "eas": {
         "projectId": "5dbc86eb-eabb-4d86-954f-16641fda8c14"
-      }
+      },
+      "displayVersion": "1.1.0"
     },
     "runtimeVersion": "1.0.0",
     "updates": {

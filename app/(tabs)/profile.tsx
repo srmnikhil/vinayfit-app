@@ -6,10 +6,14 @@ import { MembershipSheet } from '@/components/MembershipSheet';
 import { MetricsSection } from '@/components/MetricsSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
+import Constants from 'expo-constants';
+import * as Updates from 'expo-updates';
 
 export default function Profile() {
   const [membershipOpen, setMembershipOpen] = useState(false);
   const { user, signOut, loading } = useAuth();
+
+  const appVersion = Constants.expoConfig?.extra?.displayVersion || '1.0.0';
 
   const handleLogout = async () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -30,14 +34,56 @@ export default function Profile() {
     ]);
   };
 
+  const checkForUpdateManual = async () => {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        Alert.alert(
+          'Update Available',
+          'A new version of the app is available. Click to update and restart.',
+          [
+            {
+              text: 'Click to Update',
+              onPress: async () => {
+                try {
+                  await Updates.fetchUpdateAsync();
+                  await Updates.reloadAsync();
+                } catch (e) {
+                  console.error('Error updating app:', e);
+                }
+              },
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+          ],
+          { cancelable: true }
+        );
+      }
+      Alert.alert(
+        'Latest Version',
+        'You are already using the latest version of the app.'
+      );
+    } catch (e) {
+      console.error('Failed to check for updates:', e);
+    }
+  };
+
   const handleEdit = () => {
-    router.push("/profile-settings")
-  }
+    router.push('/profile-settings');
+  };
 
   const settings = [
     { label: 'Edit Profile', isLogout: false, onPress: handleEdit },
     { label: 'Notification Preferences', isLogout: false },
     { label: 'Connect Health Data', isLogout: false },
+    {
+      label: 'Check for Updates',
+      isLogout: false,
+      onPress: checkForUpdateManual,
+    },
+
     { label: 'Logout', isLogout: true, onPress: handleLogout },
   ];
 
@@ -192,6 +238,12 @@ export default function Profile() {
               </View>
             </AnimatedPressable>
           ))}
+        </View>
+        {/* App Version */}
+        <View className="mt-6 mb-6 items-center">
+          <Text className="text-textSecondary text-xs">
+            App Version {appVersion}
+          </Text>
         </View>
       </ScrollView>
       <MembershipSheet
