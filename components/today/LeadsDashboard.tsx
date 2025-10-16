@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function LeadsView() {
+export default function LeadsDashboard() {
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme || 'light'); // respects light/dark mode
   const { user } = useAuth();

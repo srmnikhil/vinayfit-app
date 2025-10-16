@@ -99,10 +99,7 @@ export default function RootLayout() {
             <Stack.Screen name="create-plan" />
             <Stack.Screen name="+not-found" />
           </Stack>
-          <StatusBar
-            style={colorScheme === 'dark' ? 'light' : 'dark'}
-            backgroundColor={colors.background}
-          />
+          <StatusBar style="light" />
         </UserStatsProvider>
       </UserProvider>
     </AuthProvider>

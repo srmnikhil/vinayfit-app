@@ -164,7 +164,7 @@ export default function ActivitiesScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> {/* Explicit background */}
       {/* Fallback View to ensure background covers all */}
       <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.background }]}> {/* Explicit background */}
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>

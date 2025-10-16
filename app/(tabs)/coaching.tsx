@@ -15,6 +15,15 @@ export default function CoachingScreen() {
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme ?? 'light');
 
+  const onNavigateToWorkouts = () => {
+    // router.push('/(tabs)/workouts');
+    Alert.alert('Workouts', 'This feature is currently under development.');
+  };
+
+  const onNavigateToDiet = () => {
+    // router.push('/(tabs)/diet');
+    Alert.alert('Diet', 'This feature is currently under development.');
+  };
   // Show loading screen until userRole is defined
   if (userRole === null) {
     return <Loader label="Loading Coaching Screen..." />;
@@ -36,17 +45,42 @@ export default function CoachingScreen() {
   // Render based on role
   switch (userRole) {
     case 'client':
-      return <CoachingClientView />;
+      return (
+        <CoachingClientView
+          onNavigateToWorkouts={onNavigateToWorkouts}
+          onNavigateToDiet={onNavigateToDiet}
+        />
+      );
     case 'trainer':
       return <CoachingTrainerView />;
     case 'nutritionist':
-      return <CoachingClientView />; // TODO
+      return (
+        <CoachingClientView
+          onNavigateToWorkouts={onNavigateToWorkouts}
+          onNavigateToDiet={onNavigateToDiet}
+        />
+      );
     case 'admin':
-      return <CoachingClientView />; // TODO
+      return (
+        <CoachingClientView
+          onNavigateToWorkouts={onNavigateToWorkouts}
+          onNavigateToDiet={onNavigateToDiet}
+        />
+      );
     case 'hr':
-      return <CoachingClientView />; // TODO
+      return (
+        <CoachingClientView
+          onNavigateToWorkouts={onNavigateToWorkouts}
+          onNavigateToDiet={onNavigateToDiet}
+        />
+      );
     default:
-      return <CoachingClientView />;
+      return (
+        <CoachingClientView
+          onNavigateToWorkouts={onNavigateToWorkouts}
+          onNavigateToDiet={onNavigateToDiet}
+        />
+      );
   }
 }
 

@@ -11,7 +11,7 @@ export default function AuthLayout() {
   return (
     <>
       {/* Render a view under the status bar for background color in edge-to-edge mode */}
-      <View style={{ height: insets.top, backgroundColor: colors.background }} />
+      {/* <View style={{ height: insets.top, backgroundColor: colors.background }} /> */}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="welcome" />
         <Stack.Screen name="sign-in" />

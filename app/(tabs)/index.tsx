@@ -5,7 +5,6 @@ import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { useUserRole } from '@/contexts/UserContext';
 import { useTodayDataNew } from '@/hooks/useTodayDataNew';
 
-// Import the new data-driven components
 // import TodayClientViewWithData from '@/components/today/TodayClientViewWithData';
 import TodayTrainerViewWithData from '@/components/today/TodayTrainerViewWithData';
 import TodayNutritionistViewWithData from '@/components/today/TodayNutritionistViewWithData';
@@ -13,8 +12,10 @@ import TodayAdminViewWithData from '@/components/today/TodayAdminViewWithData';
 import TodayClientViewWithData from '@/components/today/TodayClientViewWithData';
 import TodayClientView from '@/components/today/TodayClientView';
 import TodayTrainerViewNew from '@/components/today/TodayTrainerViewNew';
-import LeadsView from '@/components/today/LeadsView';
 import Loader from '@/components/Loader';
+import TodayClientViewNew from '@/components/today/TodayClientViewWithData';
+import ClientDashboard from '@/components/today/ClientDashboard';
+import LeadsDashboard from '@/components/today/LeadsDashboard';
 
 export default function TodayScreen() {
   const colorScheme = useColorScheme();
@@ -46,9 +47,9 @@ export default function TodayScreen() {
   // Render appropriate view based on user role
   switch (userRole) {
     case 'leads':
-      return <LeadsView />;
+      return <LeadsDashboard />;
     case 'client':
-      return <TodayClientView />;
+      return <ClientDashboard />;
     case 'trainer':
       return <TodayTrainerViewNew />;
     case 'nutritionist':

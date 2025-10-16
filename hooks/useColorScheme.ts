@@ -6,7 +6,7 @@ export function useColorScheme() {
 
 export const Colors = {
   light: {
-    background: '#F8FAFC',
+    background: '#0F1115',
     surface: '#FFFFFF',
     surfaceSecondary: '#F1F5F9',
     primary: '#3B82F6',
@@ -15,7 +15,7 @@ export const Colors = {
     text: '#111827',
     textSecondary: '#6B7280',
     textTertiary: '#9CA3AF',
-    border: '#E5E7EB',
+    border: 'rgba(255,255,255,0.08)',
     borderLight: '#F3F4F6',
     success: '#10B981',
     warning: '#F59E0B',
@@ -25,7 +25,7 @@ export const Colors = {
     overlay: 'rgba(0, 0, 0, 0.5)',
   },
   dark: {
-    background: '#0F172A',
+    background: '#0F1115',
     surface: '#1E293B',
     surfaceSecondary: '#334155',
     primary: '#60A5FA',
@@ -34,7 +34,7 @@ export const Colors = {
     text: '#F8FAFC',
     textSecondary: '#CBD5E1',
     textTertiary: '#94A3B8',
-    border: '#475569',
+    border: 'rgba(255,255,255,0.08)',
     borderLight: '#334155',
     success: '#34D399',
     warning: '#FBBF24',

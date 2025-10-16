@@ -1,17 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
+  Image,
   TouchableOpacity,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ImageBackground,
+  Alert,
+  findNodeHandle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   ArrowLeft,
   Eye,
@@ -22,16 +23,20 @@ import {
   Loader,
   Check,
 } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-export default function SignUpScreen() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = getColors(colorScheme);
-  const styles = useMemo(() => createStyles(colors), [colors]);
-  const { signUp } = useAuth();
+import LottieView from 'lottie-react-native';
+import SandyLoading from '../../assets/SandLoading.json';
+import { useUserRole } from '@/contexts/UserContext';
 
+export default function SignUpScreen() {
+  const colorScheme = useColorScheme() ?? 'dark';
+  const colors = getColors(colorScheme);
+  const { signUp } = useAuth();
+  const { setUserRole } = useUserRole();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -48,6 +53,11 @@ export default function SignUpScreen() {
     confirmPassword?: string;
     general?: string;
   }>({});
+
+  // const fullNameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const validateForm = () => {
     const newErrors: any = {};
@@ -87,10 +97,9 @@ export default function SignUpScreen() {
     try {
       const userData = {
         full_name: formData.fullName.trim(),
-        role: 'lead',
+        role: 'leads',
       };
 
-      console.log(userData)
       const { data, error } = await signUp(
         formData.email.trim(),
         formData.password,
@@ -111,7 +120,6 @@ export default function SignUpScreen() {
         return;
       }
 
-      // Insert profile with role and full_name after successful sign up
       if (data.user) {
         const { id, email } = data.user;
         const { error: profileError } = await supabase.from('profiles').upsert(
@@ -126,24 +134,24 @@ export default function SignUpScreen() {
         if (profileError) {
           console.error('Profile upsert error:', profileError);
         }
-        // Directly insert into leads table as well
-        // Split fullName into first_name and last_name (fallback to empty string if not present)
         const [firstName, ...lastNameParts] = formData.fullName
           .trim()
           .split(' ');
         const lastName =
           lastNameParts.length > 0 ? lastNameParts.join(' ') : '';
-        const { error: leadsError } = await supabase.from('leads').insert({
-          id,
-          email,
-          role: 'leads',
-          first_name: firstName,
-          last_name: lastName,
-        });
+        const { error: leadsError } = await supabase.from('leads').upsert(
+          {
+            id,
+            email,
+            role: 'leads',
+            first_name: firstName,
+            last_name: lastName,
+          },
+          { onConflict: 'email' }
+        );
         if (leadsError) {
           console.error('Leads insert error:', leadsError);
         }
-        // Fetch latest profile and update userRole in context
         try {
           const { data: profile, error: profileFetchError } = await supabase
             .from('profiles')
@@ -151,9 +159,6 @@ export default function SignUpScreen() {
             .eq('id', id)
             .single();
           if (!profileFetchError && profile?.role) {
-            // Dynamically import useUserRole to avoid hook call order issues
-            const { useUserRole } = await import('@/contexts/UserContext');
-            const { setUserRole } = useUserRole();
             setUserRole(profile.role);
           }
         } catch (e) {
@@ -165,8 +170,21 @@ export default function SignUpScreen() {
           [
             {
               text: 'Get Started',
-              onPress: () => {
-                // Navigation will be handled by the auth state change in AuthContext
+              onPress: async () => {
+                const userId = data.user?.id;
+                if (!userId) return;
+
+                const { data: leadData, error } = await supabase
+                  .from('leads')
+                  .select('is_profile_complete')
+                  .eq('id', userId)
+                  .maybeSingle();
+
+                if (!leadData?.is_profile_complete) {
+                  router.replace('/profile-settings');
+                } else {
+                  router.replace('/(tabs)');
+                }
               },
             },
           ]
@@ -179,6 +197,7 @@ export default function SignUpScreen() {
       setLoading(false);
     }
   };
+
   const updateFormData = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof typeof errors]) {
@@ -206,79 +225,118 @@ export default function SignUpScreen() {
   const passwordStrength = getPasswordStrength();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <ArrowLeft size={24} color={colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>
-              Join BODIQU and start your fitness journey
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: `${colorScheme === 'dark' ? 'black' : 'white'}`,
+      }}
+    >
+      <ImageBackground
+        source={require('@/assets/images/login-bg.webp')}
+        resizeMode="cover"
+        className="absolute inset-0 w-full h-screen"
+      />
+      <BlurView
+        intensity={1000}
+        tint="dark"
+        className="absolute inset-0 bg-white/20"
+      />
+      {loading && (
+        <View className="absolute inset-0 flex justify-center items-center z-50">
+          <View className="w-80 bg-gray-900/95 rounded-2xl flex justify-center items-center">
+            <LottieView
+              source={require('../../assets/SandLoading.json')}
+              autoPlay
+              loop
+              style={{ width: 150, height: 150 }}
+            />
+            <Text className="-mt-4 text-lg font-semibold text-white pb-4">
+              Getting you ready to move…
             </Text>
           </View>
+        </View>
+      )}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        {/* Header */}
+        <View className="px-5 pt-10 pb-10 mt-10">
+          {/* <TouchableOpacity
+              onPress={() => router.back()}
+              className={`w-10 h-10 rounded-full justify-center items-center ${
+                colorScheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'
+              } mb-5`}
+            >
+              <ArrowLeft size={24} color={colors.text} />
+            </TouchableOpacity> */}
+          <Text className="font-inter-bold text-3xl text-white mb-2">
+            Create Account
+          </Text>
+          <Text className="font-inter-regular text-base text-white/80">
+            Join BODIQO and start your fitness journey
+          </Text>
+        </View>
 
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Form */}
-          <View style={styles.form}>
+          <View className="px-5 flex-1">
             {/* General Error */}
             {errors.general && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{errors.general}</Text>
+              <View
+                className={`bg-red-500/10 border border-red-500 rounded-full p-4 mb-6`}
+              >
+                <Text className="font-inter-medium text-red-500 text-center">
+                  {errors.general}
+                </Text>
               </View>
             )}
 
             {/* Name Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Full Name</Text>
+            <View className="mb-8">
+              <Text className="font-inter-semibold text-white mb-2">
+                Full Name
+              </Text>
               <View
-                style={[
-                  styles.inputWrapper,
-                  errors.fullName && styles.inputError,
-                ]}
+                className={`flex-row items-center px-4 py-1 rounded-full border ${
+                  errors.fullName ? 'border-red-500' : 'border-white/50'
+                } ${colorScheme === 'dark' ? 'bg-gray-700/70' : 'bg-white/20'}`}
               >
-                <User
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.inputIcon}
-                />
+                <User size={20} color={colors.textSecondary} />
                 <TextInput
-                  style={styles.textInput}
                   value={formData.fullName}
                   onChangeText={(text) => updateFormData('fullName', text)}
                   placeholder="Full name"
                   placeholderTextColor={colors.textTertiary}
                   autoCapitalize="words"
+                  className="flex-1 font-inter-regular text-white text-base ml-1"
+                  returnKeyType="next"
+                  onSubmitEditing={() => emailRef.current?.focus()}
                 />
               </View>
               {errors.fullName && (
-                <Text style={styles.fieldError}>{errors.fullName}</Text>
+                <Text className="font-inter-regular text-red-500 text-xs mt-1">
+                  {errors.fullName}
+                </Text>
               )}
             </View>
 
             {/* Email Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email Address</Text>
+            <View className="mb-8">
+              <Text className="font-inter-semibold text-white mb-2">
+                Email Address
+              </Text>
               <View
-                style={[styles.inputWrapper, errors.email && styles.inputError]}
+                className={`flex-row items-center px-4 py-1 rounded-full border ${
+                  errors.email ? 'border-red-500' : 'border-white/50'
+                } ${colorScheme === 'dark' ? 'bg-gray-700/70' : 'bg-white/20'}`}
               >
-                <Mail
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.inputIcon}
-                />
+                <Mail size={20} color={colors.textSecondary} />
                 <TextInput
-                  style={styles.textInput}
+                  ref={emailRef}
                   value={formData.email}
                   onChangeText={(text) => updateFormData('email', text)}
                   placeholder="Enter your email"
@@ -286,39 +344,43 @@ export default function SignUpScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  className=" flex-1 font-inter-regular text-white text-base ml-1"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
                 />
               </View>
               {errors.email && (
-                <Text style={styles.fieldError}>{errors.email}</Text>
+                <Text className="font-inter-regular text-red-500 text-xs mt-1">
+                  {errors.email}
+                </Text>
               )}
             </View>
 
             {/* Password Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
+            <View className="mb-8">
+              <Text className="font-inter-semibold text-white mb-2">
+                Password
+              </Text>
               <View
-                style={[
-                  styles.inputWrapper,
-                  errors.password && styles.inputError,
-                ]}
+                className={`flex-row items-center px-4 py-1 rounded-full border ${
+                  errors.password ? 'border-red-500' : 'border-white/50'
+                } ${colorScheme === 'dark' ? 'bg-gray-700/70' : 'bg-white/20'}`}
               >
-                <Lock
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.inputIcon}
-                />
+                <Lock size={20} color={colors.textSecondary} />
                 <TextInput
-                  style={styles.textInput}
+                  ref={passwordRef}
                   value={formData.password}
                   onChangeText={(text) => updateFormData('password', text)}
                   placeholder="Create a password"
                   placeholderTextColor={colors.textTertiary}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
+                  className="flex-1 font-inter-regular text-white text-base ml-1"
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmPasswordRef.current?.focus()}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
-                  style={styles.eyeButton}
                 >
                   {showPassword ? (
                     <EyeOff size={20} color={colors.textSecondary} />
@@ -327,53 +389,45 @@ export default function SignUpScreen() {
                   )}
                 </TouchableOpacity>
               </View>
-
-              {/* Password Strength Indicator */}
               {formData.password.length > 0 && (
-                <View style={styles.passwordStrength}>
-                  <View style={styles.strengthBar}>
+                <View className="flex-row items-center mt-2 gap-2">
+                  <View className="flex-1 h-1 bg-gray-300/30 rounded">
                     <View
-                      style={[
-                        styles.strengthFill,
-                        {
-                          width: `${(passwordStrength.strength / 3) * 100}%`,
-                          backgroundColor: passwordStrength.color,
-                        },
-                      ]}
+                      style={{
+                        width: `${(passwordStrength.strength / 3) * 100}%`,
+                        backgroundColor: passwordStrength.color,
+                      }}
+                      className="h-full rounded"
                     />
                   </View>
                   <Text
-                    style={[
-                      styles.strengthText,
-                      { color: passwordStrength.color },
-                    ]}
+                    style={{ color: passwordStrength.color }}
+                    className="font-inter-semibold text-xs"
                   >
                     {passwordStrength.text}
                   </Text>
                 </View>
               )}
-
               {errors.password && (
-                <Text style={styles.fieldError}>{errors.password}</Text>
+                <Text className="font-inter-regular text-red-500 text-xs mt-1">
+                  {errors.password}
+                </Text>
               )}
             </View>
 
             {/* Confirm Password Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Confirm Password</Text>
+            <View className="mb-8">
+              <Text className="font-inter-semibold text-white mb-2">
+                Confirm Password
+              </Text>
               <View
-                style={[
-                  styles.inputWrapper,
-                  errors.confirmPassword && styles.inputError,
-                ]}
+                className={`flex-row items-center px-4 py-1 rounded-full border ${
+                  errors.confirmPassword ? 'border-red-500' : 'border-white/50'
+                } ${colorScheme === 'dark' ? 'bg-gray-700/70' : 'bg-white/20'}`}
               >
-                <Lock
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.inputIcon}
-                />
+                <Lock size={20} color={colors.textSecondary} />
                 <TextInput
-                  style={styles.textInput}
+                  ref={confirmPasswordRef}
                   value={formData.confirmPassword}
                   onChangeText={(text) =>
                     updateFormData('confirmPassword', text)
@@ -382,10 +436,12 @@ export default function SignUpScreen() {
                   placeholderTextColor={colors.textTertiary}
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
+                  className="flex-1 font-inter-regular text-white text-base ml-1"
+                  returnKeyType="done"
+                  onSubmitEditing={handleSignUp}
                 />
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={styles.eyeButton}
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={20} color={colors.textSecondary} />
@@ -394,64 +450,44 @@ export default function SignUpScreen() {
                   )}
                 </TouchableOpacity>
               </View>
-
-              {/* Password Match Indicator */}
               {formData.confirmPassword.length > 0 && (
-                <View style={styles.passwordMatch}>
+                <View className="mt-2">
                   {formData.password === formData.confirmPassword ? (
-                    <View style={styles.matchIndicator}>
+                    <View className="flex-row items-center gap-1">
                       <Check size={16} color={colors.success} />
-                      <Text
-                        style={[styles.matchText, { color: colors.success }]}
-                      >
+                      <Text className="font-inter-semibold text-xs text-green-500">
                         Passwords match
                       </Text>
                     </View>
                   ) : (
-                    <Text style={[styles.matchText, { color: colors.error }]}>
+                    <Text className="font-inter-semibold text-xs text-red-500">
                       Passwords do not match
                     </Text>
                   )}
                 </View>
               )}
-
-              {errors.confirmPassword && (
-                <Text style={styles.fieldError}>{errors.confirmPassword}</Text>
-              )}
             </View>
 
             {/* Sign Up Button */}
             <TouchableOpacity
-              style={[styles.signUpButton, loading && styles.buttonDisabled]}
               onPress={handleSignUp}
               disabled={loading}
+              className="py-4 rounded-full items-center mb-4 bg-blue-600 shadow-lg"
             >
-              <LinearGradient
-                colors={
-                  loading
-                    ? [colors.borderLight, colors.borderLight]
-                    : ['#667EEA', '#764BA2']
-                }
-                style={styles.buttonGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                {loading ? (
-                  <View style={styles.loadingContainer}>
-                    <Loader size={20} color="#FFFFFF" />
-                    <Text style={styles.buttonText}>Creating Account...</Text>
-                  </View>
-                ) : (
-                  <Text style={styles.buttonText}>Create Account</Text>
-                )}
-              </LinearGradient>
+              <Text className="font-inter-bold text-white text-xl">
+                CREATE ACCOUNT
+              </Text>
             </TouchableOpacity>
 
             {/* Sign In Link */}
-            <View style={styles.signInContainer}>
-              <Text style={styles.signInText}>Already have an account? </Text>
+            <View className="flex-row justify-center mt-4">
+              <Text className="font-inter-regular text-white/80">
+                Already have an account?{' '}
+              </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')}>
-                <Text style={styles.signInLink}>Sign In</Text>
+                <Text className="font-inter-semibold text-yellow-400">
+                  Sign in
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -460,177 +496,3 @@ export default function SignUpScreen() {
     </SafeAreaView>
   );
 }
-
-const createStyles = (colors: any) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    keyboardView: {
-      flex: 1,
-    },
-    scrollView: {
-      flex: 1,
-    },
-    header: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 40,
-    },
-    backButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.surface,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    title: {
-      fontFamily: 'Inter-Bold',
-      fontSize: 32,
-      color: colors.text,
-      marginBottom: 8,
-    },
-    subtitle: {
-      fontFamily: 'Inter-Regular',
-      fontSize: 16,
-      color: colors.textSecondary,
-      lineHeight: 24,
-    },
-    form: {
-      paddingHorizontal: 20,
-      paddingBottom: 40,
-    },
-    errorContainer: {
-      backgroundColor: `${colors.error}15`,
-      borderWidth: 1,
-      borderColor: colors.error,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 20,
-    },
-    errorText: {
-      fontFamily: 'Inter-Medium',
-      fontSize: 14,
-      color: colors.error,
-      textAlign: 'center',
-    },
-    inputContainer: {
-      marginBottom: 20,
-    },
-    inputLabel: {
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 16,
-      color: colors.text,
-      marginBottom: 8,
-    },
-    inputWrapper: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-    },
-    inputError: {
-      borderColor: colors.error,
-    },
-    inputIcon: {
-      marginRight: 12,
-    },
-    textInput: {
-      flex: 1,
-      fontFamily: 'Inter-Regular',
-      fontSize: 16,
-      color: colors.text,
-    },
-    eyeButton: {
-      padding: 4,
-    },
-    fieldError: {
-      fontFamily: 'Inter-Regular',
-      fontSize: 12,
-      color: colors.error,
-      marginTop: 4,
-    },
-    passwordStrength: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 8,
-      gap: 8,
-    },
-    strengthBar: {
-      flex: 1,
-      height: 4,
-      backgroundColor: colors.borderLight,
-      borderRadius: 2,
-    },
-    strengthFill: {
-      height: '100%',
-      borderRadius: 2,
-    },
-    strengthText: {
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 12,
-    },
-    passwordMatch: {
-      marginTop: 8,
-    },
-    matchIndicator: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    matchText: {
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 12,
-    },
-    signUpButton: {
-      borderRadius: 12,
-      marginTop: 12,
-      marginBottom: 24,
-      shadowColor: '#667EEA',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-    },
-    buttonDisabled: {
-      shadowOpacity: 0,
-      elevation: 0,
-    },
-    buttonGradient: {
-      paddingVertical: 18,
-      borderRadius: 12,
-      alignItems: 'center',
-    },
-    loadingContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    buttonText: {
-      fontFamily: 'Inter-Bold',
-      fontSize: 16,
-      color: '#FFFFFF',
-    },
-    signInContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    signInText: {
-      fontFamily: 'Inter-Regular',
-      fontSize: 14,
-      color: colors.textSecondary,
-    },
-    signInLink: {
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 14,
-      color: colors.primary,
-    },
-  });

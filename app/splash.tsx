@@ -16,9 +16,9 @@ import { useAuth } from '@/contexts/AuthContext';
 const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen() {
-  const colorScheme = useColorScheme() ?? 'light';
-  
-  const colors = getColors(colorScheme);
+  // const colorScheme = useColorScheme() ?? 'light';
+
+  const colors = getColors('dark');
   const styles = createStyles(colors);
   const { user, loading } = useAuth();
   const hasNavigated = useRef(false); // <-- Add this line
@@ -52,7 +52,7 @@ export default function SplashScreen() {
               router.replace('/(auth)/welcome');
             }
           }
-        }, 100);
+        }, 5000);
       }, 1500);
     }
   }, [user, loading]);
@@ -79,7 +79,7 @@ export default function SplashScreen() {
           useNativeDriver: true,
         }),
       ]),
-      
+
       // Text animations
       Animated.parallel([
         Animated.timing(textOpacity, {
@@ -94,7 +94,7 @@ export default function SplashScreen() {
           useNativeDriver: true,
         }),
       ]),
-      
+
       // Tagline animation
       Animated.parallel([
         Animated.timing(taglineOpacity, {
@@ -109,7 +109,7 @@ export default function SplashScreen() {
           useNativeDriver: true,
         }),
       ]),
-      
+
       // Icons animation
       Animated.parallel([
         Animated.timing(iconsOpacity, {
@@ -124,7 +124,7 @@ export default function SplashScreen() {
           useNativeDriver: true,
         }),
       ]),
-      
+
       // Progress bar animation
       Animated.parallel([
         Animated.timing(progressOpacity, {
@@ -161,12 +161,9 @@ export default function SplashScreen() {
   return (
     <View style={styles.container}>
       {/* <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} /> */}
-      
+
       <LinearGradient
-        colors={colorScheme === 'dark' 
-          ? ['#0F172A', '#1E293B', '#334155'] 
-          : ['#F8FAFC', '#E2E8F0', '#CBD5E1']
-        }
+        colors={['#0F1115', '#1A1C21', '#27292F']}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -183,15 +180,17 @@ export default function SplashScreen() {
                     inputRange: [0, 1],
                     outputRange: [0, 0.1],
                   }),
-                  transform: [{
-                    scale: iconsScale.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.5, 1],
-                    })
-                  }],
+                  transform: [
+                    {
+                      scale: iconsScale.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1],
+                      }),
+                    },
+                  ],
                   left: `${(index % 5) * 20 + 10}%`,
                   top: `${Math.floor(index / 5) * 20 + 10}%`,
-                }
+                },
               ]}
             />
           ))}
@@ -221,7 +220,7 @@ export default function SplashScreen() {
               >
                 <Dumbbell size={48} color="#FFFFFF" strokeWidth={2.5} />
               </LinearGradient>
-              
+
               {/* Glow effect */}
               <View style={styles.logoGlow} />
             </Animated.View>
@@ -265,13 +264,15 @@ export default function SplashScreen() {
                   style={[
                     styles.featureIcon,
                     {
-                      transform: [{
-                        scale: iconsScale.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.5, 1],
-                        })
-                      }],
-                    }
+                      transform: [
+                        {
+                          scale: iconsScale.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.5, 1],
+                          }),
+                        },
+                      ],
+                    },
                   ]}
                 >
                   <LinearGradient
@@ -289,21 +290,18 @@ export default function SplashScreen() {
 
           {/* Loading Section */}
           <Animated.View
-            style={[
-              styles.loadingSection,
-              { opacity: progressOpacity }
-            ]}
+            style={[styles.loadingSection, { opacity: progressOpacity }]}
           >
             <Text style={styles.loadingText}>
               {loading ? 'Preparing your experience...' : 'Ready to start!'}
             </Text>
-            
+
             <View style={styles.progressContainer}>
               <View style={styles.progressBackground}>
                 <Animated.View
                   style={[
                     styles.progressBar,
-                    { width: progressWidthInterpolate }
+                    { width: progressWidthInterpolate },
                   ]}
                 >
                   <LinearGradient
@@ -319,12 +317,7 @@ export default function SplashScreen() {
         </View>
 
         {/* Footer */}
-        <Animated.View
-          style={[
-            styles.footer,
-            { opacity: taglineOpacity }
-          ]}
-        >
+        <Animated.View style={[styles.footer, { opacity: taglineOpacity }]}>
           <Text style={styles.footerText}>Powered by BODIQU</Text>
           <View style={styles.footerDots}>
             {[0, 1, 2].map((index) => (
@@ -337,13 +330,15 @@ export default function SplashScreen() {
                       inputRange: [0, 1],
                       outputRange: [0.3, 1],
                     }),
-                    transform: [{
-                      scale: progressOpacity.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.5, 1],
-                      })
-                    }]
-                  }
+                    transform: [
+                      {
+                        scale: progressOpacity.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.5, 1],
+                        }),
+                      },
+                    ],
+                  },
                 ]}
               />
             ))}
@@ -354,148 +349,149 @@ export default function SplashScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gradient: {
-    flex: 1,
-  },
-  backgroundPattern: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  patternDot: {
-    position: 'absolute',
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  logoSection: {
-    alignItems: 'center',
-    marginBottom: 60,
-  },
-  logoContainer: {
-    position: 'relative',
-    marginBottom: 32,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#667EEA',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 16,
-  },
-  logoGlow: {
-    position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: '#667EEA',
-    opacity: 0.2,
-    top: -10,
-    left: -10,
-    zIndex: -1,
-  },
-  appName: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 42,
-    color: colors.text,
-    marginBottom: 12,
-    textAlign: 'center',
-    letterSpacing: -1,
-  },
-  tagline: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 18,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  featuresContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 80,
-    gap: 20,
-  },
-  featureIcon: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  featureIconGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingSection: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  loadingText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  progressContainer: {
-    width: '80%',
-    maxWidth: 280,
-  },
-  progressBackground: {
-    height: 4,
-    backgroundColor: colors.borderLight,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  progressGradient: {
-    flex: 1,
-    borderRadius: 2,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 60,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: colors.textTertiary,
-    marginBottom: 16,
-  },
-  footerDots: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  footerDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.primary,
-  },
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    gradient: {
+      flex: 1,
+    },
+    backgroundPattern: {
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+    },
+    patternDot: {
+      position: 'absolute',
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.primary,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+    },
+    logoSection: {
+      alignItems: 'center',
+      marginBottom: 60,
+    },
+    logoContainer: {
+      position: 'relative',
+      marginBottom: 32,
+    },
+    logo: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#667EEA',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 16,
+      elevation: 16,
+    },
+    logoGlow: {
+      position: 'absolute',
+      width: 140,
+      height: 140,
+      borderRadius: 70,
+      backgroundColor: '#667EEA',
+      opacity: 0.2,
+      top: -10,
+      left: -10,
+      zIndex: -1,
+    },
+    appName: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 42,
+      color: colors.text,
+      marginBottom: 12,
+      textAlign: 'center',
+      letterSpacing: -1,
+    },
+    tagline: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 18,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 24,
+    },
+    featuresContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 80,
+      gap: 20,
+    },
+    featureIcon: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    featureIconGradient: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingSection: {
+      alignItems: 'center',
+      width: '100%',
+    },
+    loadingText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 16,
+      color: colors.textSecondary,
+      marginBottom: 24,
+      textAlign: 'center',
+    },
+    progressContainer: {
+      width: '80%',
+      maxWidth: 280,
+    },
+    progressBackground: {
+      height: 4,
+      backgroundColor: colors.borderLight,
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    progressBar: {
+      height: '100%',
+      borderRadius: 2,
+    },
+    progressGradient: {
+      flex: 1,
+      borderRadius: 2,
+    },
+    footer: {
+      position: 'absolute',
+      bottom: 60,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
+    footerText: {
+      fontFamily: 'Inter-Regular',
+      fontSize: 12,
+      color: colors.textTertiary,
+      marginBottom: 16,
+    },
+    footerDots: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    footerDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.primary,
+    },
+  });

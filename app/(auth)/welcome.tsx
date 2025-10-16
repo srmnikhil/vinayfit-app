@@ -1,74 +1,103 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Dumbbell } from 'lucide-react-native';
-import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { router } from 'expo-router';
 
-const { width, height } = Dimensions.get('window');
-
 export default function WelcomeScreen() {
-  const colorScheme = useColorScheme();
-  const colors = getColors(colorScheme ?? 'light');
-  // Always recalculate styles on every render for color scheme changes
-  const styles = React.useMemo(() => createStyles(colors, width, height), [colors, width, height]);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const isTablet = width >= 768;
+
+  const logoSize = isTablet ? 140 : 120;
+  const appNameSize = isTablet ? 48 : 40;
+  const taglineSize = isTablet ? 20 : 18;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView className="flex-1 bg-[#0F1115]">
+      <View
+        className={`flex-1 justify-between items-center px-${
+          isTablet ? '10' : '16'
+        } py-${isLandscape ? '10' : '16'}`}
+      >
         {/* Logo Section */}
-        <View style={styles.logoSection}>
-          <View style={styles.logoContainer}>
+        <View className="flex-1 justify-center items-center mb-48">
+          <View className="mb-12">
             <LinearGradient
-              colors={['#667EEA', '#764BA2']}
-              style={styles.logo}
+              colors={['#5C6BC0', '#6B4BA2', '#D67FFB']} // tweaked gradient shades
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
+              style={{
+                width: logoSize,
+                height: logoSize,
+                borderRadius: logoSize / 2,
+                justifyContent: 'center',
+                alignItems: 'center',
+                shadowColor: '#5C6BC0',
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.3,
+                shadowRadius: 16,
+                elevation: 16,
+              }}
             >
               <Dumbbell size={48} color="#FFFFFF" strokeWidth={2.5} />
             </LinearGradient>
           </View>
 
-          <Text style={styles.appName}>BODIQU</Text>
-          <Text style={styles.tagline}>Transform Your Fitness Journey</Text>
+          <Text
+            className="text-white text-center font-inter-bold"
+            style={{
+              fontSize: appNameSize,
+              marginBottom: 16,
+              letterSpacing: -1,
+            }}
+          >
+            BODIQU
+          </Text>
+
+          <Text
+            className="text-[#A2ACBA] text-center font-inter-regular"
+            style={{ fontSize: taglineSize, lineHeight: 26 }}
+          >
+            Transform Your Fitness Journey
+          </Text>
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.actionSection}>
+        <View className="w-full max-w-[320px] space-y-4">
           <TouchableOpacity
-            style={styles.primaryButton}
+            className="rounded-[16px]"
             onPress={() => router.push('/(auth)/sign-up')}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#667EEA', '#764BA2']}
-              style={styles.primaryButtonGradient}
+              colors={['#5C6BC0', '#6B4BA2']} // tweaked gradient
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
+              style={{ borderRadius: 16 }}
+              className="py-6 mb-6 items-center"
             >
-              <Text style={styles.primaryButtonText}>Get Started</Text>
+              <Text className="text-white font-inter-bold text-xl">
+                Get Started
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.secondaryButton}
+            className="py-4 items-center rounded-[16px] border-2 border-[#7B8493] bg-[#12151B]"
             onPress={() => router.push('/(auth)/sign-in')}
             activeOpacity={0.8}
           >
-            <Text style={styles.secondaryButtonText}>Sign In</Text>
+            <Text className="text-white font-inter-semibold text-[18px]">
+              Sign In
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
+        <View className="items-center pb-5">
+          <Text className="text-[#A2ACBA] text-center font-inter-regular text-[14px]">
             Start your fitness transformation today
           </Text>
         </View>
@@ -76,103 +105,3 @@ export default function WelcomeScreen() {
     </SafeAreaView>
   );
 }
-
-const createStyles = (colors: any, screenWidth: number, screenHeight: number) => {
-  const isLandscape = screenWidth > screenHeight;
-  const isTablet = screenWidth >= 768;
-  
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background, // Ensure background updates with color scheme
-    },
-    content: {
-      flex: 1,
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: isTablet ? 60 : 40,
-      paddingVertical: isLandscape ? 40 : 60,
-    },
-    logoSection: {
-      alignItems: 'center',
-      flex: 1,
-      justifyContent: 'center',
-    },
-    logoContainer: {
-      marginBottom: 32,
-    },
-    logo: {
-      width: isTablet ? 120 : 100,
-      height: isTablet ? 120 : 100,
-      borderRadius: isTablet ? 60 : 50,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#667EEA',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.3,
-      shadowRadius: 16,
-      elevation: 16,
-    },
-    appName: {
-      fontFamily: 'Inter-Bold',
-      fontSize: isTablet ? 48 : 40,
-      color: colors.text,
-      marginBottom: 16,
-      textAlign: 'center',
-      letterSpacing: -1,
-    },
-    tagline: {
-      fontFamily: 'Inter-Regular',
-      fontSize: isTablet ? 20 : 18,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 26,
-    },
-    actionSection: {
-      width: '100%',
-      maxWidth: 320,
-      gap: 16,
-    },
-    primaryButton: {
-      borderRadius: 16,
-      shadowColor: '#667EEA',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-    },
-    primaryButtonGradient: {
-      paddingVertical: 18,
-      borderRadius: 16,
-      alignItems: 'center',
-    },
-    primaryButtonText: {
-      fontFamily: 'Inter-Bold',
-      fontSize: 18,
-      color: '#FFFFFF',
-    },
-    secondaryButton: {
-      paddingVertical: 18,
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.border,
-      borderRadius: 16,
-      backgroundColor: colors.surface,
-    },
-    secondaryButtonText: {
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 18,
-      color: colors.text,
-    },
-    footer: {
-      alignItems: 'center',
-      paddingBottom: 20,
-    },
-    footerText: {
-      fontFamily: 'Inter-Regular',
-      fontSize: 14,
-      color: colors.textTertiary,
-      textAlign: 'center',
-    },
-  });
-};

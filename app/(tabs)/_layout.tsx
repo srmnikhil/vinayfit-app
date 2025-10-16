@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import {
-  Chrome as Home,
   Dumbbell,
   MessageSquare,
   Play,
@@ -13,6 +12,8 @@ import {
   Briefcase,
   House,
   HouseIcon,
+  Mail,
+  User2,
 } from 'lucide-react-native';
 import { useColorScheme, getColors } from '@/hooks/useColorScheme';
 import { useUserRole } from '@/contexts/UserContext';
@@ -26,9 +27,11 @@ import {
   cleanupExpiredNotifications,
 } from '@/utils/notificationService';
 import { View, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function NotificationListener() {
   const { user } = useAuth();
+
   useEffect(() => {
     let subscription: { remove: () => void } | undefined;
     if (user) {
@@ -52,11 +55,12 @@ function NotificationListener() {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const colors = getColors(colorScheme ?? 'light');
+  const colors = getColors(colorScheme ?? 'dark');
   const { userRole } = useUserRole();
   const { user, loading } = useAuth();
   const pathname = usePathname();
-
+  const insets = useSafeAreaInsets();
+  
   useEffect(() => {
     if (!loading && !user && pathname !== '/(auth)/welcome') {
       router.replace('/(auth)/login');
@@ -68,7 +72,7 @@ export default function TabLayout() {
     const baseTabs = [
       {
         name: 'index',
-        title: 'Today',
+        title: 'Home',
         icon: House,
       },
     ];
@@ -79,21 +83,16 @@ export default function TabLayout() {
         {
           name: 'coaching',
           title: 'Coaching',
-          icon: Dumbbell,
-        },
-        {
-          name: 'on-demand',
-          title: 'On-demand',
-          icon: Play,
+          icon: Users,
         },
         {
           name: 'inbox',
           title: 'Inbox',
-          icon: MessageSquare,
+          icon: Mail,
         },
         {
           name: 'profile',
-          title: 'You',
+          title: 'Profile',
           icon: User,
         },
       ],
@@ -104,15 +103,10 @@ export default function TabLayout() {
           title: 'Clients',
           icon: Users,
         },
-        {
-          name: 'on-demand',
-          title: 'Programs',
-          icon: Play,
-        },
-        {
+         {
           name: 'inbox',
-          title: 'Messages',
-          icon: MessageSquare,
+          title: 'Inbox',
+          icon: Mail,
         },
         {
           name: 'profile',
@@ -127,15 +121,10 @@ export default function TabLayout() {
           title: 'Clients',
           icon: Users,
         },
-        {
-          name: 'on-demand',
-          title: 'Meal Plans',
-          icon: Apple,
-        },
-        {
+         {
           name: 'inbox',
-          title: 'Messages',
-          icon: MessageSquare,
+          title: 'Inbox',
+          icon: Mail,
         },
         {
           name: 'profile',
@@ -149,11 +138,6 @@ export default function TabLayout() {
           name: 'coaching',
           title: 'Management',
           icon: Shield,
-        },
-        {
-          name: 'on-demand',
-          title: 'System',
-          icon: Play,
         },
         {
           name: 'inbox',
@@ -172,11 +156,6 @@ export default function TabLayout() {
           name: 'coaching',
           title: 'Staff',
           icon: Briefcase,
-        },
-        {
-          name: 'on-demand',
-          title: 'Resources',
-          icon: Play,
         },
         {
           name: 'inbox',
@@ -211,27 +190,35 @@ export default function TabLayout() {
       height: 64, // fixed height
       borderTopColor: colors.border,
       paddingBottom: 0,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.background,
       zIndex: 100,
     }),
     [colors]
   );
 
-
+  if (loading || !user) {
+    return (
+      <View className="flex-1 items-center justify-center dark:bg-[#0F172A]">
+        <Text className="text-white text-base font-semibold">
+          Checking authentication...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <>
-      <StatusBar
-        style={colorScheme === 'dark' ? 'light' : 'dark'}
-        backgroundColor={colors.background}
+      <View
+        style={{ height: insets.top, backgroundColor: colors.background }}
       />
+      <StatusBar style="light" />
       {/* Only mount NotificationListener when user is authenticated and navigation is ready */}
       <NotificationListener />
       <Tabs
         screenOptions={{
           headerShown: false,
           tabBarStyle: tabBarStyle,
-          tabBarActiveTintColor: colors.primary,
+          tabBarActiveTintColor: "#F8FAFC",
           tabBarInactiveTintColor: colors.textTertiary,
           tabBarLabelStyle: styles.tabBarLabel,
         }}

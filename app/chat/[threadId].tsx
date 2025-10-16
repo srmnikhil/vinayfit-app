@@ -37,23 +37,6 @@ const conversations: Thread[] = [
         time: '10:40 AM',
         isCoach: true,
       },
-       { sender: 'Coach Rahul', text: 'Hey!', time: '10:30 AM', isCoach: true },
-      { sender: 'You', text: 'Hello!', time: '10:35 AM', isCoach: false },
-      {
-        sender: 'Coach Rahul',
-        text: 'Great job!',
-        time: '10:40 AM',
-        isCoach: true,
-      },
-       { sender: 'Coach Rahul', text: 'Hey!', time: '10:30 AM', isCoach: true },
-      { sender: 'You', text: 'Hello!', time: '10:35 AM', isCoach: false },
-      {
-        sender: 'Coach Rahul',
-        text: 'Great job!',
-        time: '10:40 AM',
-        isCoach: true,
-      },
-      
     ],
   },
   {
@@ -115,7 +98,7 @@ export default function ChatScreen() {
         {/* Messages */}
         <ScrollView
           className="flex-1 px-4 py-4"
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
         >
           {thread.messages.map((msg, index) => (
             <View

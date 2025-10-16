@@ -9,14 +9,14 @@ interface LoaderProps {
 
 export default function Loader({ size = 350, label }: LoaderProps) {
   return (
-    <View className="flex-1 justify-center items-center dark:bg-[#0F172A]">
+    <View className="flex-1 justify-center items-center dark:bg-appBackground">
       <LottieView
         source={require('../assets/loading.json')}
         autoPlay
         loop
         style={{ width: size, height: size }}
       />
-      <Text className='text-2xl font-bold italic dark:text-[#94A3B8]'>{label}</Text>
+      <Text className='text-2xl font-bold italic dark:text-textSecondary'>{label}</Text>
     </View>
   );
 }
